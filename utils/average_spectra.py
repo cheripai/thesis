@@ -15,7 +15,7 @@ label = df.iloc[:,0]
 df = df.iloc[:,1:]
 
 if (df.shape[1]) % N != 0:
-    raise Exception("Columns in data are not divisible by {}.".format(N))
+    raise Exception("Number of columns: {}. Not divisible by {}.".format(df.shape[1], N))
 
 # Average every N columns
 average_df = pd.DataFrame()
