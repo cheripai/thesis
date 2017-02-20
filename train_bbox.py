@@ -1,40 +1,35 @@
-import json
-import numpy as np
-import os
-from keras.layers import Dense
-from keras.preprocessing import image
-from vgg16 import VGG16
+import bcolz
+import sys
+from os import path
+from vgg16 import VGG
 
 
-
-TRAIN_PATH = "data/train_bbox"
-VALID_PATH = "data/valid_bbox"
-SIZE = (4000, 3000)
-TARGET_SIZE = (224, 224)
-
-
-def create_rect(bb, color="red"):
-    return plt.Rectangle((bb[2], bb[3]), bb[1], bb[0], color=color, fill=False, lw=3)
+TRAIN_DATA = "data/train_bbox/train.dat"
+TRAIN_TARGET_DATA = "data/train_bbox/train_target.dat"
+VALID_DATA = "data/valid_bbox/valid.dat"
+VALID_TARGET_DATA = "data/valid_bbox/valid_target.dat"
+WEIGHTS_PATH = "data/vgg_bbox.h5"
 
 
 if __name__ == "__main__":
-    train_bbs = json.load(open(os.path.join(TRAIN_PATH, "annotations.json")))
-    valid_bbs = json.load(open(os.path.join(VALID_PATH, "annotations.json")))
 
-    train = np.zeros((len(train_bbs), 3, TARGET_SIZE[0], TARGET_SIZE[1]))
-    valid = np.zeros((len(valid_bbs), 3, TARGET_SIZE[0], TARGET_SIZE[1]))
-    train_target, valid_target = [], []
-    for i, (key, bb) in zip(range(len(train_bbs)), train_bbs.items()):
-        img = image.load_img(os.path.join(TRAIN_PATH, key), target_size=TARGET_SIZE)
-        train[i] = image.img_to_array(img)
-        train_target.append(bb)
-    for i, (key, bb) in zip(range(len(valid_bbs)), valid_bbs.items()):
-        img = image.load_img(os.path.join(VALID_PATH, key), target_size=TARGET_SIZE)
-        valid[i] = image.img_to_array(img)
-        valid_target.append(bb)
+    if path.exists(TRAIN_DATA) and path.exists(VALID_DATA) \
+        and path.exists(TRAIN_TARGET_DATA) and path.exists(VALID_TARGET_DATA):
+        train = bcolz.open(TRAIN_DATA)[:]
+        train_target = bcolz.open(TRAIN_TARGET_DATA)[:]
+        valid = bcolz.open(VALID_DATA)[:]
+        valid_target = bcolz.open(VALID_TARGET_DATA)[:]
+    else:
+        print("No training or validation data found.")
+        print("Run make_bbox_dataset.py first!")
+        sys.exit(1)
 
-    vgg = VGG16()
-    vgg.model.pop()
-    vgg.model.add(Dense(4))
-    vgg.model.compile(optimizer="Adam", loss="mse")
-    vgg.model.fit(train, train_target, batch_size=32, nb_epoch=30, validation_data=(valid, valid_target))
+    vgg = VGG(4, 0.01, 0)
+    vgg.model.fit(
+        train,
+        train_target,
+        batch_size=64,
+        nb_epoch=100,
+        validation_data=(valid, valid_target))
+
+    vgg.model.save_weights(WEIGHTS_PATH)

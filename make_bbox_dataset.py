@@ -1,14 +1,21 @@
+import bcolz
 import json
 import numpy as np
 import os
 import shutil
+from keras.preprocessing import image
 
 
 # DATA_PATH should have subdirectories of images with an annotations file
 DATA_PATH = "data/RGB"
 TRAIN_PATH = "data/train_bbox"
 VALID_PATH = "data/valid_bbox"
+TRAIN_DATA = "data/train_bbox/train.dat"
+TRAIN_TARGET_DATA = "data/train_bbox/train_target.dat"
+VALID_DATA = "data/valid_bbox/valid.dat"
+VALID_TARGET_DATA = "data/valid_bbox/valid_target.dat"
 SIZE = (4000, 3000)
+TARGET_SIZE = (224, 224)
 VALID_PROP = 0.15
 
 
@@ -65,3 +72,27 @@ if __name__ == "__main__":
         json.dump(train_bbs, f)
     with open(os.path.join(VALID_PATH, "annotations.json"), "w") as f:
         json.dump(valid_bbs, f)
+
+    # Convert images to np array
+    train = np.zeros((len(train_bbs), 3, TARGET_SIZE[0], TARGET_SIZE[1]))
+    valid = np.zeros((len(valid_bbs), 3, TARGET_SIZE[0], TARGET_SIZE[1]))
+    train_target, valid_target = [], []
+    for i, (key, bb) in zip(range(len(train_bbs)), train_bbs.items()):
+        img = image.load_img(
+            os.path.join(TRAIN_PATH, key), target_size=TARGET_SIZE)
+        train[i] = image.img_to_array(img)
+        train_target.append(bb)
+    for i, (key, bb) in zip(range(len(valid_bbs)), valid_bbs.items()):
+        img = image.load_img(
+            os.path.join(VALID_PATH, key), target_size=TARGET_SIZE)
+        valid[i] = image.img_to_array(img)
+        valid_target.append(bb)
+
+    train_target = np.array(train_target)
+    valid_target = np.array(valid_target)
+
+    # Write arrays to disk
+    bcolz.carray(train, rootdir=TRAIN_DATA, mode="w").flush()
+    bcolz.carray(train_target, rootdir=TRAIN_TARGET_DATA, mode="w").flush()
+    bcolz.carray(valid, rootdir=VALID_DATA, mode="w").flush()
+    bcolz.carray(valid_target, rootdir=VALID_TARGET_DATA, mode="w").flush()
