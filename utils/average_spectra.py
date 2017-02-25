@@ -4,7 +4,7 @@ import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", metavar="<file>", type=str, help="CSV file to process")
-parser.add_argument("-n", type=int, default=40, help="Number of spectra to average")
+parser.add_argument("-n", type=int, default=20, help="Number of spectra to average")
 args = parser.parse_args()
 
 N = args.n
