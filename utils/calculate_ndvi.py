@@ -26,21 +26,24 @@ def integrate_ranges(df, red_range, nir_range):
     return pd.Series(red_area), pd.Series(nir_area)
 
 
+def calculateNDVI(df):
+    offset = int(df.iloc[0,0])
+    red_range_offset = [r - offset for r in RED_RANGE]
+    nir_range_offset = [n - offset for n in NIR_RANGE]
+
+    RED, NIR = average_ranges(df, red_range_offset, nir_range_offset)
+
+    NDVI = (NIR - RED) / (NIR + RED)
+    return NDVI
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", metavar="<file>", type=str, help="CSV file to process")
     args = parser.parse_args()
 
     df = pd.read_csv(args.filename)
-
-    offset = int(df.iloc[0,0])
-    red_range_offset = [r - offset for r in RED_RANGE]
-    nir_range_offset = [n - offset for n in NIR_RANGE]
-
-    RED, NIR = average_ranges(df, red_range_offset, nir_range_offset)
-    # RED, NIR = integrate_ranges(df, red_range_offset, nir_range_offset)
-
-    NDVI = (NIR - RED) / (NIR + RED)
+    NDVI = calculateNDVI(df)
 
     out_filename = args.filename.split(".")[0] + "_ndvi.csv"
     print("Saving to {}".format(out_filename))
