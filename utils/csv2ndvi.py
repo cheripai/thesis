@@ -39,12 +39,23 @@ class Main(Frame):
 
     def open_file(self):
         f = filedialog.askopenfilename()
-        if type(f) is str:
+        if type(f) is str and f != "":
             self.df = pd.read_csv(f, sep=None)
         return
 
     def calculate(self):
-        averaged = average_dataframe(self.df, int(self.num_spectra.get()))
+        if self.df is None:
+            messagebox.showinfo("Error", "Please select a CSV file")
+            return
+        try:
+            num_spectra = int(self.num_spectra.get())
+        except:
+            messagebox.showinfo("Error", "Invalid value for \"Number of Spectra\"")
+            return
+        if (self.df.shape[1] - 1) % num_spectra != 0:
+            messagebox.showinfo("Error", "Number of spectra not divisble by {}".format(num_spectra))
+            return
+        averaged = average_dataframe(self.df, num_spectra)
         ndvi = calculateNDVI(averaged)
         ndvi.to_csv(self.output_filename.get(), index=False)
         messagebox.showinfo("File saved!", "File saved to {}".format(self.output_filename.get()))
