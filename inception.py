@@ -10,7 +10,7 @@ class Inception():
 
     def __init__(self, outputs, lr, decay):
         inception_base = InceptionV3(weights="imagenet", include_top=False)
-        self.model = self.add_top(resnet_base, outputs)
+        self.model = self.add_top(inception_base, outputs)
         opt = Adam(lr=lr, decay=decay)
         self.model.compile(optimizer=opt, loss="mse")
 
