@@ -55,6 +55,7 @@ def get_ndvi(path):
     return cleaned_fname_ndvi
 
 
+# TODO: Load this from config file
 if sys.argv[1] == "bb":
     # DATA_PATH should have subdirectories of images with an annotations file
     DATA_PATH = "data/RGB"

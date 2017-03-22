@@ -1,14 +1,14 @@
 import bcolz
 import sys
 from os import path
-from vgg16 import VGG
+from cnn import VGG
 
 
 TRAIN_DATA = "data/train_bbox/train.dat"
 TRAIN_TARGET_DATA = "data/train_bbox/train_target.dat"
 VALID_DATA = "data/valid_bbox/valid.dat"
 VALID_TARGET_DATA = "data/valid_bbox/valid_target.dat"
-WEIGHTS_PATH = "data/vgg_bbox.h5"
+WEIGHTS_PATH = "data/bbox_weights.h5"
 
 
 if __name__ == "__main__":
@@ -21,15 +21,15 @@ if __name__ == "__main__":
         valid_target = bcolz.open(VALID_TARGET_DATA)[:]
     else:
         print("No training or validation data found.")
-        print("Run make_bbox_dataset.py first!")
+        print("Run make_dataset.py first!")
         sys.exit(1)
 
-    vgg = VGG(4, 0.01, 0)
-    vgg.model.fit(
+    cnn = VGG(4, 0.01, 0)
+    cnn.model.fit(
         train,
         train_target,
         batch_size=64,
         nb_epoch=100,
         validation_data=(valid, valid_target))
 
-    vgg.model.save_weights(WEIGHTS_PATH)
+    cnn.model.save_weights(WEIGHTS_PATH)

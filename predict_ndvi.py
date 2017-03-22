@@ -2,8 +2,7 @@ import numpy as np
 import os
 import sys
 from keras.preprocessing import image
-from inception import Inception
-from vgg16 import VGG
+from cnn import Inception
 
 
 WEIGHTS_PATH = "data/ndvi_weights.h5"

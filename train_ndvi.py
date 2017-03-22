@@ -1,8 +1,7 @@
 import bcolz
 import sys
 from os import path
-from inception import Inception
-from vgg16 import VGG
+from cnn import Inception
 
 
 TRAIN_DATA = "data/train_ndvi/train.dat"
@@ -22,7 +21,7 @@ if __name__ == "__main__":
         valid_target = bcolz.open(VALID_TARGET_DATA)[:]
     else:
         print("No training or validation data found.")
-        print("Run make_bbox_dataset.py first!")
+        print("Run make_dataset.py first!")
         sys.exit(1)
 
     cnn = Inception(1, 0.01, 0)
