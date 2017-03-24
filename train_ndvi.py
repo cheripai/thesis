@@ -2,7 +2,7 @@ import bcolz
 import sys
 from keras.preprocessing.image import ImageDataGenerator
 from os import path
-from cnn import Inception, ResNet
+from cnn import Inception, ResNet, VGG
 
 
 TRAIN_DATA = "data/train_ndvi/train.dat"
@@ -33,18 +33,11 @@ if __name__ == "__main__":
         print("Run make_dataset.py first!")
         sys.exit(1)
 
-    # cnn = Inception(1, 0.01, 0)
-    cnn = ResNet(1, 0.01, 0)
+    cnn = Inception(1, 0.01, 0)
     cnn.model.fit_generator(
         datagen.flow(train, train_target, batch_size=64),
         len(train),
         epochs=100,
         validation_data=(valid, valid_target))
-   #  cnn.model.fit(
-   #      train,
-   #      train_target,
-   #      batch_size=64,
-   #      nb_epoch=100,
-   #      validation_data=(valid, valid_target))
 
     cnn.model.save_weights(WEIGHTS_PATH)
