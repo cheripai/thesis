@@ -7,9 +7,10 @@ import sys
 from keras.preprocessing import image
 from matplotlib import pyplot as plt
 from cnn import VGG
+from utils.utils import get_config
 
 
-WEIGHTS_PATH = "data/bbox_weights.h5"
+config = get_config()["bbox"]
 
 
 def create_rect(bb, color="red"):
@@ -18,7 +19,7 @@ def create_rect(bb, color="red"):
 
 
 def load_img(path):
-    img = image.load_img(path, target_size=(224, 224))
+    img = image.load_img(path, target_size=TARGET_SIZE)
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     return x
@@ -34,7 +35,7 @@ if __name__ == "__main__":
 
     x = load_img(sys.argv[1])
 
-    cnn = VGG(4, 0.01, 0)
-    cnn.model.load_weights(WEIGHTS_PATH)
+    cnn = VGG(4, config["LR"], config["DECAY"])
+    cnn.model.load_weights(config["WEIGHTS_PATH"])
     bb = cnn.model.predict(x)[0]
     plot(x[0], bb)

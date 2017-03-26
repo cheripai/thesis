@@ -3,25 +3,20 @@ import sys
 from keras.preprocessing.image import ImageDataGenerator
 from os import path
 from cnn import Inception, ResNet, VGG
+from utils.utils import get_config
 
 
-TRAIN_DATA = "data/train_ndvi/train.dat"
-TRAIN_TARGET_DATA = "data/train_ndvi/train_target.dat"
-VALID_DATA = "data/valid_ndvi/valid.dat"
-VALID_TARGET_DATA = "data/valid_ndvi/valid_target.dat"
-WEIGHTS_PATH = "data/ndvi_weights.h5"
+config = get_config()["ndvi"]
 
 
 if __name__ == "__main__":
 
-    if path.exists(TRAIN_DATA) and path.exists(VALID_DATA) \
-        and path.exists(TRAIN_TARGET_DATA) and path.exists(VALID_TARGET_DATA):
-        train = bcolz.open(TRAIN_DATA)[:]
-        train_target = bcolz.open(TRAIN_TARGET_DATA)[:]
-        valid = bcolz.open(VALID_DATA)[:]
-        valid_target = bcolz.open(VALID_TARGET_DATA)[:]
-        train = train.reshape(train.shape[0], train.shape[2], train.shape[3], train.shape[1])
-        valid = valid.reshape(valid.shape[0], valid.shape[2], valid.shape[3], valid.shape[1])
+    if path.exists(config["TRAIN_DATA"]) and path.exists(config["VALID_DATA"]) \
+        and path.exists(config["TRAIN_TARGET_DATA"]) and path.exists(config["VALID_TARGET_DATA"]):
+        train = bcolz.open(config["TRAIN_DATA"])[:]
+        train_target = bcolz.open(config["TRAIN_TARGET_DATA"])[:]
+        valid = bcolz.open(config["VALID_DATA"])[:]
+        valid_target = bcolz.open(config["VALID_TARGET_DATA"])[:]
         
         datagen = ImageDataGenerator(
             horizontal_flip=True,
@@ -33,11 +28,11 @@ if __name__ == "__main__":
         print("Run make_dataset.py first!")
         sys.exit(1)
 
-    cnn = Inception(1, 0.01, 0)
+    cnn = Inception(1, config["LR"], config["DECAY"])
     cnn.model.fit_generator(
-        datagen.flow(train, train_target, batch_size=64),
+        datagen.flow(train, train_target, batch_size=config["BATCH_SIZE"]),
         len(train),
-        epochs=100,
+        epochs=config["EPOCHS"],
         validation_data=(valid, valid_target))
 
-    cnn.model.save_weights(WEIGHTS_PATH)
+    cnn.model.save_weights(config["WEIGHTS_PATH"])
