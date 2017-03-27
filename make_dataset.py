@@ -8,7 +8,35 @@ from utils.utils import get_config
 from keras.preprocessing import image
 
 
+def split_train_valid(data, data_path, train_path, valid_path, valid_prop):
+    """ Copies images to new train/valid path and returns split data for training and validation.
+    """
+    train_key_target = {}
+    valid_key_target = {}
+    key_target = list(data.items())
+    np.random.shuffle(key_target)
+
+    # Copy and rename image files to new location
+    for i, (key, target) in zip(range(len(data)), key_target):
+        filename = str(i) + ".jpg"
+        if i < int(valid_prop * len(data)):
+            valid_key_target[filename] = target
+            shutil.copyfile(os.path.join(data_path, key), os.path.join(valid_path, filename))
+        else:
+            train_key_target[filename] = target
+            shutil.copyfile(os.path.join(data_path, key), os.path.join(train_path, filename))
+
+    with open(os.path.join(train_path, "labels.json"), "w") as f:
+        json.dump(train_key_target, f)
+    with open(os.path.join(valid_path, "labels.json"), "w") as f:
+        json.dump(valid_key_target, f)
+
+    return train_key_target, valid_key_target
+
+
 def data_to_array(fname_target, path, target_size=(224, 224)):
+    """ Converts dictionary of filename, target to split numpy arrays of each.
+    """
     array = np.zeros((len(fname_target), target_size[0], target_size[1], 3))
     targets = []
     for i, (fname, target) in zip(range(len(fname_target)), fname_target.items()):
@@ -19,7 +47,8 @@ def data_to_array(fname_target, path, target_size=(224, 224)):
 
 
 def get_bbs(path, size=(4000, 3000)):
-    # Load bounding box json files
+    """ Loads bounding box coordinates from JSON file and associates it with image filename.
+    """
     bb_json = {}
     empty_bbox = {"height": 0., "width": 0., "x": 0., "y": 0.}
     for d in os.listdir(path):
@@ -39,6 +68,8 @@ def get_bbs(path, size=(4000, 3000)):
 
 
 def convert_bb(bb, size):
+    """ Converts bounding box from original image size to 224x224.
+    """
     bb_params = ["height", "width", "x", "y"]
     bb = [bb[p] for p in bb_params]
     conv_x = (224. / size[0])
@@ -51,6 +82,8 @@ def convert_bb(bb, size):
 
 
 def get_ndvi(path, valid_exts=(".jpg")):
+    """ Loads ndvi from file and associates each NDVI with image filename.
+    """
     fname_ndvi = {}
     for d in os.listdir(path):
         p = os.path.join(path, d, "ndvi.txt")
@@ -71,40 +104,23 @@ def get_ndvi(path, valid_exts=(".jpg")):
 if __name__ == "__main__":
     config = get_config()[sys.argv[1]]
     if sys.argv[1] == "bbox":
-        datas = get_bbs(config["DATA_PATH"], config["SIZE"])
+        data = get_bbs(config["DATA_PATH"], config["SIZE"])
     elif sys.argv[1] == "ndvi":
-        datas = get_ndvi(config["DATA_PATH"], config["VALID_EXT"])
+        data = get_ndvi(config["DATA_PATH"], config["VALID_EXT"])
     else:
         raise ValueError("Invalid argument: {}".format(sys.argv[1]))
-
-    train_datas = {}
-    valid_datas = {}
 
     if not os.path.exists(config["TRAIN_PATH"]):
         os.makedirs(config["TRAIN_PATH"])
     if not os.path.exists(config["VALID_PATH"]):
         os.makedirs(config["VALID_PATH"])
 
-    # Copy and rename image files to new location
-    keys_datas = list(datas.items())
-    np.random.shuffle(keys_datas)
-    for i, (key, data) in zip(range(len(datas)), keys_datas):
-        filename = str(i) + ".jpg"
-        if i < int(config["VALID_PROP"] * len(datas)):
-            valid_datas[filename] = data
-            shutil.copyfile(os.path.join(config["DATA_PATH"], key), os.path.join(config["VALID_PATH"], filename))
-        else:
-            train_datas[filename] = data
-            shutil.copyfile(os.path.join(config["DATA_PATH"], key), os.path.join(config["TRAIN_PATH"], filename))
-
-    with open(os.path.join(config["TRAIN_PATH"], "labels.json"), "w") as f:
-        json.dump(train_datas, f)
-    with open(os.path.join(config["VALID_PATH"], "labels.json"), "w") as f:
-        json.dump(valid_datas, f)
+    train_key_target, valid_key_target = split_train_valid(data, config["DATA_PATH"], config["TRAIN_PATH"],
+                                                           config["VALID_PATH"], config["VALID_PROP"])
 
     # Convert images and targets to np arrays
-    train, train_target = data_to_array(train_datas, config["TRAIN_PATH"], target_size=config["TARGET_SIZE"])
-    valid, valid_target = data_to_array(valid_datas, config["VALID_PATH"], target_size=config["TARGET_SIZE"])
+    train, train_target = data_to_array(train_key_target, config["TRAIN_PATH"], target_size=config["TARGET_SIZE"])
+    valid, valid_target = data_to_array(valid_key_target, config["VALID_PATH"], target_size=config["TARGET_SIZE"])
 
     # Write arrays to disk
     bcolz.carray(train, rootdir=config["TRAIN_DATA"], mode="w").flush()

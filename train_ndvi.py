@@ -20,9 +20,9 @@ if __name__ == "__main__":
         
         datagen = ImageDataGenerator(
             horizontal_flip=True,
-            width_shift_range=0.05,
-            height_shift_range=0.05,
-            zoom_range=0.05)
+            width_shift_range=config["WIDTH_SHIFT_RANGE"],
+            height_shift_range=config["HEIGHT_SHIFT_RANGE"],
+            zoom_range=config["ZOOM_RANGE"])
     else:
         print("No training or validation data found.")
         print("Run make_dataset.py first!")
