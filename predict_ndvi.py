@@ -25,13 +25,13 @@ if __name__ == "__main__":
         for path in os.listdir(sys.argv[1]):
             if path.endswith(config["VALID_EXT"]):
                 x = load_img(os.path.join(sys.argv[1], path))
-                ndvi = cnn.model.predict(x)[0]
-                print(ndvi)
+                ndvi = cnn.model.predict(x)
+                print(ndvi.squeeze())
                 
     elif sys.argv[1].endswith(config["VALID_EXT"]):
         x = load_img(sys.argv[1])
-        ndvi = cnn.model.predict(x)[0]
-        print(ndvi)
+        ndvi = cnn.model.predict(x)
+        print(ndvi.squeeze())
 
     else:
         print("Error: invalid argument.")
