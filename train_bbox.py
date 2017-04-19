@@ -26,7 +26,7 @@ if __name__ == "__main__":
         train,
         train_target,
         batch_size=config["BATCH_SIZE"],
-        nb_epoch=config["EPOCHS"],
+        epochs=config["EPOCHS"],
         validation_data=(valid, valid_target))
 
     cnn.model.save_weights(config["WEIGHTS_PATH"])
