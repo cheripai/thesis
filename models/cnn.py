@@ -37,7 +37,7 @@ class CNN:
         x = BatchNormalization()(x)
         x = Dropout(dropout)(x)
         predictions = Dense(outputs)(x)
-        model = Model(input=base_model.input, output=predictions)
+        model = Model(inputs=base_model.input, outputs=predictions)
         for layer in base_model.layers:
             layer.trainable = False
         return model

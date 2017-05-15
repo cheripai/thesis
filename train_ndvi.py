@@ -2,7 +2,7 @@ import bcolz
 import sys
 from keras.preprocessing.image import ImageDataGenerator
 from os import path
-from cnn import Inception, ResNet, VGG
+from models.cnn import Inception, ResNet, VGG
 from utils.utils import get_config
 
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     cnn = Inception(1, config["LR"], config["DECAY"])
     cnn.model.fit_generator(
         datagen.flow(train, train_target, batch_size=config["BATCH_SIZE"]),
-        len(train),
+        len(train) // config["BATCH_SIZE"] + 1,
         epochs=config["EPOCHS"],
         validation_data=(valid, valid_target))
 

@@ -1,7 +1,7 @@
 import bcolz
 import sys
 from os import path
-from cnn import VGG
+from models.cnn import VGG
 from utils.utils import get_config
 
 
