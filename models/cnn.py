@@ -11,7 +11,7 @@ class CNN:
 
     model = None
 
-    def __init__(self, outputs, lr, decay, dropout):
+    def __init__(self, outputs, lr, decay, dense, dropout):
 
         if type(self).__name__ == "VGG":
             base = VGG16(weights="imagenet", include_top=False)
@@ -22,18 +22,18 @@ class CNN:
         else:
             raise ValueError("Invalid model name: {}".format(type(self).__name__))
 
-        self.model = self.add_top(base, outputs, dropout)
+        self.model = self.add_top(base, outputs, dense, dropout)
         opt = Adam(lr=lr, decay=decay)
         self.model.compile(optimizer=opt, loss="mse")
 
 
-    def add_top(self, base_model, outputs, dropout):
+    def add_top(self, base_model, outputs, dense, dropout):
         x = base_model.output
         x = GlobalAveragePooling2D()(x)
-        x = Dense(512, activation="relu")(x)
+        x = Dense(dense, activation="relu")(x)
         x = BatchNormalization()(x)
         x = Dropout(dropout)(x)
-        x = Dense(512, activation="relu")(x)
+        x = Dense(dense, activation="relu")(x)
         x = BatchNormalization()(x)
         x = Dropout(dropout)(x)
         predictions = Dense(outputs)(x)
@@ -44,15 +44,15 @@ class CNN:
 
 
 class VGG(CNN):
-    def __init__(self, outputs, lr, decay, dropout=0.6):
-        super(self.__class__, self).__init__(outputs, lr, decay, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.6):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
 
 
 class Inception(CNN):
-    def __init__(self, outputs, lr, decay, dropout=0.5):
-        super(self.__class__, self).__init__(outputs, lr, decay, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
 
 
 class ResNet(CNN):
-    def __init__(self, outputs, lr, decay, dropout=0.5):
-        super(self.__class__, self).__init__(outputs, lr, decay, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
