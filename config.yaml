@@ -6,7 +6,7 @@ bbox:
     TRAIN_TARGET_DATA: "data/train_bbox/train_target.dat"
     VALID_DATA: "data/valid_bbox/valid.dat"
     VALID_TARGET_DATA: "data/valid_bbox/valid_target.dat"
-    WEIGHTS_PATH: "data/bbox_weights.h5"
+    WEIGHTS_PATH: "results/bbox_weights.h5"
     SIZE: !!python/tuple [4000, 3000]
     TARGET_SIZE: !!python/tuple [224, 224]
     VALID_PROP: 0.15
@@ -23,16 +23,16 @@ ndvi:
     TRAIN_TARGET_DATA: "data/train_ndvi/train_target.dat"
     VALID_DATA: "data/valid_ndvi/valid.dat"
     VALID_TARGET_DATA: "data/valid_ndvi/valid_target.dat"
-    WEIGHTS_PATH: "data/ndvi_weights.h5"
+    WEIGHTS_PATH: "results/ndvi_weights.h5"
     SIZE: !!python/tuple [4000, 3000]
     TARGET_SIZE: !!python/tuple [224, 224]
-    VALID_EXT: !!python/tuple [".jpg"]
+    VALID_EXT: !!python/tuple [".jpg", ".JPG"]
     VALID_PROP: 0.15
 
     LR: 0.01
     DECAY: 0
     BATCH_SIZE: 64
-    EPOCHS: 30
+    EPOCHS: 100
     WIDTH_SHIFT_RANGE: 0.05
     HEIGHT_SHIFT_RANGE: 0.05
     ZOOM_RANGE: 0.05

@@ -1,5 +1,6 @@
 import bcolz
 import sys
+from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from os import path
 from models.cnn import Inception, ResNet, VGG
@@ -29,6 +30,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     cnn = Inception(1, config["LR"], config["DECAY"])
+    callbacks = [
+        ModelCheckpoint(config["WEIGHTS_PATH"], monitor="val_loss", save_best_only=True, save_weights_only=True),
+        TensorBoard(log_dir="results/logs")
+    ]
     cnn.model.fit_generator(
         datagen.flow(train, train_target, batch_size=config["BATCH_SIZE"]),
         len(train) // config["BATCH_SIZE"] + 1,

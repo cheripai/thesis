@@ -2,7 +2,7 @@ import numpy as np
 import os
 import sys
 from keras.preprocessing import image
-from cnn import Inception
+from models.cnn import Inception
 from utils.utils import get_config
 
 
