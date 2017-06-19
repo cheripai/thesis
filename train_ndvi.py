@@ -20,6 +20,7 @@ if __name__ == "__main__":
         valid_target = bcolz.open(config["VALID_TARGET_DATA"])[:]
         
         datagen = ImageDataGenerator(
+            rescale=1./255,
             horizontal_flip=True,
             width_shift_range=config["WIDTH_SHIFT_RANGE"],
             height_shift_range=config["HEIGHT_SHIFT_RANGE"],

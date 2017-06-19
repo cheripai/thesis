@@ -13,7 +13,7 @@ def load_img(path):
     img = image.load_img(path, target_size=config["TARGET_SIZE"])
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
-    return x
+    return x / 255
 
 
 if __name__ == "__main__":
