@@ -94,7 +94,7 @@ if __name__ == "__main__":
     mean_color = int(np.mean(cropped))
     cropped[cropped == 0] = mean_color
 
-    segments = segment(cropped, 2)
+    segments = segment(cropped, 4)
 
     if not os.path.exists(out_path):
         os.makedirs(out_path)
