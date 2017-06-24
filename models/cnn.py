@@ -11,7 +11,7 @@ class CNN:
 
     model = None
 
-    def __init__(self, outputs, lr, decay, dense, dropout):
+    def __init__(self, outputs, lr, decay, dense, dropout, classification):
 
         if type(self).__name__ == "VGG":
             base = VGG16(weights="imagenet", include_top=False)
@@ -21,10 +21,14 @@ class CNN:
             base = InceptionV3(weights="imagenet", include_top=False)
         else:
             raise ValueError("Invalid model name: {}".format(type(self).__name__))
+        self.classification = classification
 
         self.model = self.add_top(base, outputs, dense, dropout)
         opt = Adam(lr=lr, decay=decay)
-        self.model.compile(optimizer=opt, loss="mse")
+        if self.classification == True:
+            self.model.compile(optimizer=opt, loss="categorical_crossentropy", metrics=["acc"])
+        else:
+            self.model.compile(optimizer=opt, loss="mse")
 
 
     def add_top(self, base_model, outputs, dense, dropout):
@@ -36,7 +40,10 @@ class CNN:
         x = Dense(dense, activation="relu")(x)
         x = BatchNormalization()(x)
         x = Dropout(dropout)(x)
-        predictions = Dense(outputs)(x)
+        if self.classification == True:
+            predictions = Dense(outputs, activation="softmax")(x)
+        else:
+            predictions = Dense(outputs)(x)
         model = Model(inputs=base_model.input, outputs=predictions)
         for layer in base_model.layers:
             layer.trainable = False
@@ -44,15 +51,15 @@ class CNN:
 
 
 class VGG(CNN):
-    def __init__(self, outputs, lr, decay, dense=512, dropout=0.6):
-        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.6, classification=False):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout, classification)
 
 
 class Inception(CNN):
-    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5):
-        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5, classification=False):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout, classification)
 
 
 class ResNet(CNN):
-    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5):
-        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout)
+    def __init__(self, outputs, lr, decay, dense=512, dropout=0.5, classification=False):
+        super(self.__class__, self).__init__(outputs, lr, decay, dense, dropout, classification)
