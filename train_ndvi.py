@@ -30,7 +30,7 @@ if __name__ == "__main__":
         print("Run make_dataset.py first!")
         sys.exit(1)
 
-    cnn = Inception(1, config["LR"], config["DECAY"])
+    cnn = Inception(1, config["LR"], config["DECAY"], activation="sigmoid")
     callbacks = [
         ModelCheckpoint(config["WEIGHTS_PATH"], monitor="val_loss", save_best_only=True, save_weights_only=True),
         TensorBoard(log_dir="results/logs")
