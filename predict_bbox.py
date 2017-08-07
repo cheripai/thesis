@@ -6,7 +6,7 @@ import PyQt5
 import sys
 from keras.preprocessing import image
 from matplotlib import pyplot as plt
-from cnn import VGG
+from models.cnn import VGG
 from utils.utils import get_config
 
 
@@ -19,14 +19,14 @@ def create_rect(bb, color="red"):
 
 
 def load_img(path):
-    img = image.load_img(path, target_size=TARGET_SIZE)
+    img = image.load_img(path, target_size=config["TARGET_SIZE"])
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     return x
 
 
 def plot(img, bb):
-    plt.imshow(np.rollaxis(img, 0, 3).astype(np.uint8))
+    plt.imshow(img.astype(np.uint8))
     plt.gca().add_patch(create_rect(bb))
     plt.show()
 
