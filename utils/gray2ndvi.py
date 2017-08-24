@@ -8,16 +8,16 @@ import sys
 
 def threshold(arr, min_ndvi, max_ndvi, t=48):
     step = (max_ndvi - min_ndvi) / 255
-    arr[arr <= t*step + min_ndvi] = 0
+    arr[arr <= t*step + min_ndvi] = np.nan
     return arr
 
 
 def gray2ndvi(img, min_ndvi, max_ndvi):
-    ndvi = np.zeros(gray.shape)
-    step = np.zeros(gray.shape)
+    ndvi = np.zeros(img.shape)
+    step = np.zeros(img.shape)
 
     step[:] = (max_ndvi - min_ndvi) / 255
-    ndvi = np.multiply(gray, step) + min_ndvi
+    ndvi = np.multiply(img, step) + min_ndvi
 
     return ndvi
 
@@ -32,4 +32,4 @@ if __name__ == "__main__":
     ndvi = gray2ndvi(gray, min_ndvi, max_ndvi)
     ndvi = threshold(ndvi, min_ndvi, max_ndvi)
 
-    print(ndvi)
+    print(np.nanmean(ndvi))
