@@ -39,7 +39,6 @@ if __name__ == "__main__":
     directory = sys.argv[1]
     size = get_size(directory)
     rows, cols = get_rows_cols(directory)
-    print(size, rows, cols)
 
     png_files = get_png_files(directory)
     img = np.zeros((size * rows, size * cols, 3))
