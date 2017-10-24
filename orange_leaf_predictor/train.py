@@ -112,13 +112,12 @@ class SimpleNet(nn.Module):
 
         
 if __name__ == "__main__":
-    batch_size = 32
+    batch_size = 24
     leaf_train, leaf_valid = get_train_test("data/img", "data/chlorophyll.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-    # model = DenseNet().cuda()
-    model = SimpleNet().cuda()
+    model = DenseNet().cuda()
     criterion = nn.MSELoss()
     valid_criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=0.005)
@@ -133,7 +132,7 @@ if __name__ == "__main__":
             loss = criterion(outputs, y)
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.data[0] / batch_size
+            epoch_loss += loss.data[0] / X.size(0)
         print("Epoch {} Train Loss {}".format(i, epoch_loss))
 
         valid_loss = 0
@@ -141,5 +140,5 @@ if __name__ == "__main__":
             X, y = Variable(X.cuda()), Variable(y.type(torch.FloatTensor).cuda())
             outputs = model(X)
             loss = valid_criterion(outputs, y)
-            valid_loss += loss.data[0] / batch_size
+            valid_loss += loss.data[0] / X.size(0)
         print("Epoch {} Validation Loss {}".format(i, valid_loss))
