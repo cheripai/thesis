@@ -113,14 +113,18 @@ class SimpleNet(nn.Module):
         
 if __name__ == "__main__":
     batch_size = 24
-    leaf_train, leaf_valid = get_train_test("data/img", "data/chlorophyll.txt")
+    lr = 0.001
+    leaf_train, leaf_valid = get_train_test("data/img", "data/ndvi.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     model = DenseNet().cuda()
     criterion = nn.MSELoss()
     valid_criterion = nn.L1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=0.005)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    print(model)
+    print("Learning rate: {}".format(lr))
 
     epochs = 10
     for i in range(epochs):
