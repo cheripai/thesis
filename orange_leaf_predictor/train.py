@@ -1,9 +1,10 @@
+import numpy as np
 import os
-from PIL import Image
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from PIL import Image
 from sklearn.utils import shuffle
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
@@ -70,12 +71,13 @@ class DenseNet(nn.Module):
         super(DenseNet, self).__init__()
         self.model = models.densenet121(pretrained=True).cuda()
         self.model.classifier = nn.Linear(self.model.classifier.in_features, features)
-        self.dense = nn.Linear(features, 1)
         self.relu = nn.ReLU()
+        self.bn = nn.BatchNorm2d(features)
+        self.dense = nn.Linear(features, 1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, X):
-        output = self.relu(self.model(X))
+        output = self.bn(self.relu(self.model(X)))
         return self.sigmoid(self.dense(output))
 
 
@@ -113,7 +115,7 @@ class SimpleNet(nn.Module):
         
 if __name__ == "__main__":
     batch_size = 24
-    lr = 0.001
+    lr = 0.005
     leaf_train, leaf_valid = get_train_test("data/img", "data/ndvi.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
@@ -136,7 +138,7 @@ if __name__ == "__main__":
             loss = criterion(outputs, y)
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.data[0] / X.size(0)
+            epoch_loss += loss.data[0]
         print("Epoch {} Train Loss {}".format(i, epoch_loss))
 
         valid_loss = 0
@@ -144,5 +146,5 @@ if __name__ == "__main__":
             X, y = Variable(X.cuda()), Variable(y.type(torch.FloatTensor).cuda())
             outputs = model(X)
             loss = valid_criterion(outputs, y)
-            valid_loss += loss.data[0] / X.size(0)
+            valid_loss += loss.data[0]
         print("Epoch {} Validation Loss {}".format(i, valid_loss))
