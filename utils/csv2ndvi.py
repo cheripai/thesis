@@ -40,7 +40,7 @@ class Main(Frame):
     def open_file(self):
         f = filedialog.askopenfilename()
         if type(f) is str and f != "":
-            self.df = pd.read_csv(f, sep=None)
+            self.df = pd.read_csv(f, sep=None, engine="python")
         return
 
     def calculate(self):
