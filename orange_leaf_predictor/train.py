@@ -42,7 +42,7 @@ def get_train_test(img_dir, label_file, p=0.2):
         labels, missing_idx = load_labels(label_file)
         for i in sorted(missing_idx, reverse=True):
             del img_paths[i]
-        labels = normalize(labels)
+        # labels = normalize(labels)
         img_paths, labels = shuffle(img_paths, labels)
         split = int(len(img_paths) * p)
         return LeafDataset(img_paths[split:], labels[split:]), LeafDataset(img_paths[:split], labels[:split])
@@ -60,25 +60,26 @@ def load_labels(label_filename):
     with open(label_filename) as f:
         for i, line in enumerate(f.readlines()):
             try:
-                labels.append(float(line.strip()))
+                labels.append(int(line.strip()))
             except ValueError:
                 missing_idx.append(i)
     return labels, missing_idx
             
 
 class DenseNet(nn.Module):
-    def __init__(self, features=128):
+    def __init__(self, features=128, p=0.1):
         super(DenseNet, self).__init__()
         self.model = models.densenet121(pretrained=True).cuda()
         self.model.classifier = nn.Linear(self.model.classifier.in_features, features)
         self.relu = nn.ReLU()
         self.bn = nn.BatchNorm2d(features)
-        self.dense = nn.Linear(features, 1)
-        self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout(p=p)
+        self.dense = nn.Linear(features, 3)
+        self.softmax = nn.Softmax()
 
     def forward(self, X):
-        output = self.bn(self.relu(self.model(X)))
-        return self.sigmoid(self.dense(output))
+        output = self.dropout(self.bn(self.relu(self.model(X))))
+        return self.softmax(self.dense(output))
 
 
 class SimpleNet(nn.Module):
@@ -112,17 +113,21 @@ class SimpleNet(nn.Module):
             num_features *= s
         return num_features
 
+
+def correct(outputs, targets):
+    _, outputs = torch.max(outputs.data, -1)
+    return torch.sum(outputs == targets.data)
+
         
 if __name__ == "__main__":
     batch_size = 24
     lr = 0.005
-    leaf_train, leaf_valid = get_train_test("data/img", "data/ndvi.txt")
+    leaf_train, leaf_valid = get_train_test("data/img", "data/chlorophyll_classes.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     model = DenseNet().cuda()
-    criterion = nn.MSELoss()
-    valid_criterion = nn.L1Loss()
+    criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     print(model)
@@ -130,21 +135,30 @@ if __name__ == "__main__":
 
     epochs = 10
     for i in range(epochs):
-        epoch_loss = 0
+        train_loss = 0
+        train_acc = 0
+        count = 0
         for X, y in train_loader:
-            X, y = Variable(X.cuda()), Variable(y.type(torch.FloatTensor).cuda())
+            X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
             optimizer.zero_grad()
             outputs = model(X)
             loss = criterion(outputs, y)
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.data[0]
-        print("Epoch {} Train Loss {}".format(i, epoch_loss))
+            train_loss += loss.data[0]
+            train_acc += correct(outputs ,y)
+            count += X.size(0)
+        train_acc /= count
+        print("Epoch {} Train Loss {} Train Accuracy {}".format(i, round(train_loss, 4), round(train_acc, 4)))
 
         valid_loss = 0
+        valid_acc = 0
         for X, y in valid_loader:
-            X, y = Variable(X.cuda()), Variable(y.type(torch.FloatTensor).cuda())
+            X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
             outputs = model(X)
-            loss = valid_criterion(outputs, y)
+            loss = criterion(outputs, y)
             valid_loss += loss.data[0]
-        print("Epoch {} Validation Loss {}".format(i, valid_loss))
+            valid_acc += correct(outputs ,y)
+            count += X.size(0)
+        valid_acc = valid_acc / count
+        print("Epoch {} Valid Loss {} Valid Accuracy {}".format(i, round(valid_loss, 4), round(valid_acc, 4)))
