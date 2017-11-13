@@ -34,7 +34,7 @@ class Main(Frame):
         self.calculate_button = Button(self, text="Calculate", command=self.calculate)
         self.calculate_button.grid(row=2, column=1, sticky=S)
 
-        self.num_spectra_entry.insert(END, "20")
+        self.num_spectra_entry.insert(END, "15")
         self.output_filename_entry.insert(END, "ndvi.txt")
 
     def open_file(self):
