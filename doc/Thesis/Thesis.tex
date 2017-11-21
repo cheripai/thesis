@@ -1,0 +1,109 @@
+%% ----------------------------------------------------------------
+%% Thesis.tex -- MAIN FILE (the one that you compile with LaTeX)
+%% ---------------------------------------------------------------- 
+
+% Set up the document
+\documentclass[a4paper, 11pt, oneside]{Thesis}  % Use the "Thesis" style, based on the ECS Thesis style by Steve Gunn
+\graphicspath{Figures/}  % Location of the graphics files (set up for graphics to be in PDF format)
+
+% Include any extra LaTeX packages required
+\usepackage[square, numbers, comma, sort&compress]{natbib}  % Use the "Natbib" style for the references in the Bibliography
+\usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
+\usepackage{vector}  % Allows "\bvec{}" and "\buvec{}" for "blackboard" style bold vectors in maths
+\hypersetup{urlcolor=blue, colorlinks=true}  % Colours hyperlinks in blue, but this can be distracting if there are many links.
+
+%% ----------------------------------------------------------------
+\begin{document}
+\frontmatter      % Begin Roman style (i, ii, iii, iv...) page numbering
+
+%% ----------------------------------------------------------------
+\Declaration{
+
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+
+I have read the attached thesis proposal and, in my opinion, it
+proposes work which is adequate in depth and scope to serve as the
+culminating experience for the Master's Degree in Computer Science.
+I would agree to chair this committee or serve thereon.\\
+
+ 
+Thesis\\Advisor:\\
+\rule[1em]{38em}{0.5pt}
+
+Possible\\Committee\\Member:\\
+\rule[1em]{38em}{0.5pt}
+
+Possible\\Committee\\Member:\\
+\rule[1em]{38em}{0.5pt}
+
+}
+\clearpage
+
+% The Abstract Page
+\addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
+\abstract{
+\thispagestyle{plain}
+The consistently increasing population entails a proportionately increased demand for food, or agricultural production.
+However, such a demand for agricultural production cannot be easily met due to limited natural resources.
+For example, at the current state of affairs, California does not have enough water to sustain all agricultural activities \cite{Medellin}.
+Furthermore, these limited natural resources are needlessly diminished by careless agricultural practices.
+Such practices have further ecological implications, evidenced by the excess use of fertilizers, such as nitrogen, leading to groundwater leaching \cite{Lin2001}.
+In this work, we seek to address these problems by developing a system that utilizes unmanned aerial vehicles (UAVs) and machine learning to analyze crop quality.
+The data acquired from the UAV is processed by our algorithm, which informs end-users of the suggested treatments.
+Specifically, the algorithm determines if additional irrigation or fertilization is necessary for each plant.
+By developing an automated system for crop quality analysis, we conserve physical resources while reducing human labor and the ecological impact of agriculture.
+%
+% As our population increases, agricultural production must increase accordingly.
+% Despite this growth in population, we are still limited by our natural resources. 
+% Furthermore, careless agricultural practices can damage these natural resources.
+% At the current state of affairs, California does not have enough water to sustain all agricultural activities and %SOURCE!!!! 
+% excessive use of fertilizers, such as nitrogen, can lead to groundwater leaching %SOURCE!!!!.
+% In this work, we seek to address these problems by developing a system that utilizes unmanned aerial vehicles (UAVs) and machine learning to analyze crop quality.
+% The data from the UAV is processed by our algorithm which informs end-users of the suggested treatments.
+% Specifically, the algorithm determines if additional irrigation or fertilization is necessary for each plant.
+% By developing an automated system for crop quality analysis, we conserve physical resources while reducing human labor and the ecological impact of agriculture.
+}
+
+\clearpage  % Abstract ended, start a new page
+%% ----------------------------------------------------------------
+\tableofcontents  % Write out the Table of Contents
+
+%% ----------------------------------------------------------------
+\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
+\clearpage  % Start a new page
+
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\pagestyle{fancy}  % Return the page headers back to the "fancy" style
+
+% Include the chapters of the thesis, as separate files
+% Just uncomment the lines as you write the chapters
+
+\input{Chapters/Chapter1} % Introduction
+
+\input{Chapters/Chapter2} % Literature Survey
+
+\input{Chapters/Chapter3} % Research Goals
+
+\input{Chapters/Chapter4}
+
+\input{Chapters/Chapter5}
+
+\input{Chapters/Chapter6} % Timeline
+
+%\input{Chapters/Chapter6} % Results and Discussion
+
+%\input{Chapters/Chapter7} % Conclusion
+
+%% ----------------------------------------------------------------
+% Now begin the Appendices, including them as separate files
+
+\backmatter
+
+%% ----------------------------------------------------------------
+\label{Bibliography}
+\lhead{\emph{Bibliography}}  % Change the left side page header to "Bibliography"
+\bibliographystyle{unsrtnat}  % Use the "unsrtnat" BibTeX style for formatting the Bibliography
+\bibliography{Bibliography}  % The references (bibliography) information are stored in the file named "Bibliography.bib"
+
+\end{document}  % The End
+%% ----------------------------------------------------------------
