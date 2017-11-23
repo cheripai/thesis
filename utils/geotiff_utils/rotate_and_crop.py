@@ -9,9 +9,7 @@ LETTUCE_ROTATION = 39.7
 def maximalRectangleInHistogram(histogram):
     """
     Calculate the maximum rectangle area in terms of a given histogram.
-    (Ver.2)
     :param histogram: List[int]
-    :return:  int
     """
     # Stack for storing the index.
     posStack = []
@@ -51,10 +49,7 @@ def maximalRectangleInHistogram(histogram):
 def maximalRectangle(matrix):
     """
         :type matrix: List[List[int]]
-        :rtype: int
-        """
-    if not matrix:
-        return 0
+    """
     maxArea = 0
     maxHeight = 0
     maxWidth = 0
@@ -88,8 +83,12 @@ if __name__ == "__main__":
     rows, cols = img.shape[:2]
     M = cv2.getRotationMatrix2D((cols // 2, rows // 2), LETTUCE_ROTATION, 1)
     rotated = cv2.warpAffine(img, M, (cols, rows))
-    binarized = np.where(rotated[:, :, 3] < 255, 0, 1).tolist()
-    height, width, row, col = maximalRectangle(binarized)
-
-    rotated = rotated[row-height:row, col:col+width]
-    cv2.imwrite("rotated.png", rotated)
+    # binarized = np.where(rotated[:, :, 3] < 255, 0, 1).tolist()
+    # height, width, row, col = maximalRectangle(binarized)
+    # rotated = rotated[row-height:row, col:col+width]
+    ret, thresh = cv2.threshold(rotated[:,:,3], 244, 255, 0)
+    _, contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    x, y, w, h = cv2.boundingRect(contours[-1])
+    rotated = rotated[y:y+h, x:x+w]
+    rotated[np.where(rotated[:,:,3] < 255)] = 0
+    cv2.imwrite("rotated.png", rotated[:,:,:3])
