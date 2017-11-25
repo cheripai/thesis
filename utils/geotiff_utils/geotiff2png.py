@@ -6,9 +6,6 @@ from osgeo import gdal
 from scipy.misc import imsave
 
 
-def strip_filename(fname):
-    return os.path.splitext(os.path.basename(fname))[0]
-
 def geotiff2arrays(fname):
     try:
         data = gdal.Open(fname)
@@ -34,5 +31,4 @@ if __name__ == "__main__":
     img_array[:, :, :3] = np.expand_dims(vbin(values), axis=-1)
     img_array[:, :, 3] = transparency
 
-    basename = strip_filename(infile)
-    imsave(basename + ".png", img_array)
+    imsave(argv[2], img_array)
