@@ -31,4 +31,4 @@ if __name__ == "__main__":
     img_array[:, :, :3] = np.expand_dims(vbin(values), axis=-1)
     img_array[:, :, 3] = transparency
 
-    imsave(argv[2], img_array)
+    imsave(sys.argv[2], img_array)
