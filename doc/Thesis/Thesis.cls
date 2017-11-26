@@ -33,7 +33,7 @@
 \vskip 30\p@
 \begin{center}{\bf Thesis Title\par}\end{center}
 \begin{center}{Dat Do}\end{center}
-\begin{center}{December 14, 2017}\end{center}
+\begin{center}{November 27, 2017}\end{center}
 \vskip 30\p@
 {\normalsize #1}
 \vfil\vfil\null

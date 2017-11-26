@@ -1,12 +1,11 @@
 \chapter{Research Goals}
 
-The goal of this work is to build and train algorithms to analyze aerial imagery of lettuce and orange plants. This imagery will include both hyperspectral and RGB data so that comparisons can be made between the two. In the analysis we will attempt to predict plant health, where water potential and chlorophyll content are key indicators of such. The indicators will be collected using a water potential meter and a chlorophyll meter. 
+The goal of this work is to build and train algorithms to analyze aerial imagery of lettuce plants. This imagery will include both multispectral and RGB data so that comparisons can be made between the two. In the analysis we will attempt to predict plant health, where water potential and chlorophyll content are key indicators of such. The indicators will be collected using a water potential meter and a chlorophyll meter. 
 
 The research goals are as follows:
 \begin{enumerate}
-    \item Using remote sensing, create datasets of hyperspectral and RGB imagery of lettuce and orange plants
+    \item Using remote sensing, create datasets of multispectral and RGB imagery of lettuce plants
     \item Collect ground truthing data and associate each value with the plant's ID
-    \item Create localization algorithm to crop plant from imagery and produce plant ID
-    \item Train convolutional neural network to predict plant health from imagery
-    \item Train an algorithm to predict NDVI values from RGB imagery
+    \item Train convolutional neural networks to predict plant health indicators from imagery
+    \item Train an algorithm to convert RGB images to NDVI images.
 \end{enumerate}
