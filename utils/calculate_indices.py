@@ -5,6 +5,14 @@ import pandas as pd
 
 RED_RANGE = [655, 700]
 NIR_RANGE = [750, 1076]
+GREEN1 = 550
+YELLOW1 = 680
+RED1 = 680
+RED3 = 670
+NIR1 = 800
+NIR3 = 900
+NIR4 = 970
+NIR5 = 700
 
 
 def average_ranges(df, red_range, nir_range):
@@ -35,6 +43,27 @@ def calculateNDVI(df):
 
     NDVI = (NIR - RED) / (NIR + RED)
     return NDVI
+
+
+def calculateWBI(df):
+    offset = int(df.iloc[0,0])
+    nir3 = df.iloc[NIR3-offset,1:]
+    nir4 = df.iloc[NIR4-offset,1:]
+    return nir4 / nir3
+
+
+def calculateRedEdge(df):
+    offset = int(df.iloc[0,0])
+    red3 = df.iloc[RED3-offset,1:]
+    nir5 = df.iloc[NIR5-offset,1:]
+    return nir5 / red3
+
+
+def calculateGNDVI(df):
+    offset = int(df.iloc[0,0])
+    nir1 = df.iloc[NIR1-offset,1:]
+    green1 = df.iloc[GREEN1-offset,1:]
+    return (nir1 - green1) / (nir1 + green1)
 
 
 if __name__ == "__main__":

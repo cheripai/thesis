@@ -2,14 +2,14 @@ import pandas as pd
 from tkinter import *
 from tkinter import filedialog, messagebox
 from average_spectra import average_dataframe
-from calculate_ndvi import calculateNDVI
+from calculate_indices import calculateWBI, calculateNDVI, calculateRedEdge, calculateGNDVI
 
 
 class Main(Frame):
 
     def __init__(self):
         Frame.__init__(self)
-        self.master.title("csv2ndvi")
+        self.master.title("csv2indices")
         self.master.rowconfigure(5, weight=1)
         self.master.columnconfigure(5, weight=1)
         self.grid(sticky=W+E+N+S)
@@ -35,7 +35,7 @@ class Main(Frame):
         self.calculate_button.grid(row=2, column=1, sticky=S)
 
         self.num_spectra_entry.insert(END, "15")
-        self.output_filename_entry.insert(END, "ndvi.txt")
+        self.output_filename_entry.insert(END, "indices.txt")
 
     def open_file(self):
         f = filedialog.askopenfilename()
@@ -56,8 +56,12 @@ class Main(Frame):
             messagebox.showinfo("Error", "Number of spectra not divisble by {}".format(num_spectra))
             return
         averaged = average_dataframe(self.df, num_spectra)
-        ndvi = calculateNDVI(averaged)
-        ndvi.to_csv(self.output_filename.get(), index=False)
+        indices = pd.DataFrame()
+        indices["GNDVI"] = calculateGNDVI(averaged)
+        indices["NDVI"] = calculateNDVI(averaged)
+        indices["RedEdge"] = calculateRedEdge(averaged)
+        indices["WBI"] = calculateWBI(averaged)
+        indices.to_csv(self.output_filename.get(), index=False)
         messagebox.showinfo("File saved!", "File saved to {}".format(self.output_filename.get()))
 
 
