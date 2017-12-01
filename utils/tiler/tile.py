@@ -1,3 +1,10 @@
+# 
+# Tiles multiple input images into tiles where all tiles are from the same coordinates.
+# Requires all input images to be georeferenced and of the same dimensions.
+#
+# Usage: python tile.py <image_0> <image_1> ... <image_n>
+#
+
 import numpy as np
 import os
 import sys
