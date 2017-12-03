@@ -127,14 +127,16 @@ if __name__ == "__main__":
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     model = DenseNet().cuda()
-    criterion = nn.NLLLoss()
+    # criterion = nn.MSELoss()
+    criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     print(model)
     print("Learning rate: {}".format(lr))
 
-    epochs = 10
+    epochs = 20
     for i in range(epochs):
+        print("Epoch", i)
         train_loss = 0
         train_acc = 0
         count = 0
@@ -149,10 +151,11 @@ if __name__ == "__main__":
             train_acc += correct(outputs ,y)
             count += X.size(0)
         train_acc /= count
-        print("Epoch {} Train Loss {} Train Accuracy {}".format(i, round(train_loss, 4), round(train_acc, 4)))
+        print("Train Loss {} Train Accuracy {}".format(round(train_loss, 4), round(train_acc, 4)))
 
         valid_loss = 0
         valid_acc = 0
+        count = 0
         for X, y in valid_loader:
             X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
             outputs = model(X)
@@ -161,4 +164,4 @@ if __name__ == "__main__":
             valid_acc += correct(outputs ,y)
             count += X.size(0)
         valid_acc = valid_acc / count
-        print("Epoch {} Valid Loss {} Valid Accuracy {}".format(i, round(valid_loss, 4), round(valid_acc, 4)))
+        print("Valid Loss {} Valid Accuracy {}".format(round(valid_loss, 4), round(valid_acc, 4)))
