@@ -110,7 +110,8 @@ class FCDenseNet(nn.Module):
         nIn += self.growth_rates[2 * n_scales] * \
             self.depths[2 * n_scales]
         self.conv_last = nn.Conv2d(nIn, n_classes, 1, bias=True)
-        self.logsoftmax = nn.LogSoftmax()
+        # self.logsoftmax = nn.LogSoftmax()
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         x = self.conv_first(x)
@@ -135,7 +136,8 @@ class FCDenseNet(nn.Module):
             x = torch.cat((skip, x), 1)
             x = self.dense_blocks[self.n_scales + 1 + i](x)
         x = self.conv_last(x)
-        return self.logsoftmax(x)
+        # return self.logsoftmax(x)
+        return self.sigmoid(x)
 
     def get_TD(self, nIn, drop_rate):
         layers = [nn.BatchNorm2d(nIn), nn.ReLU(
