@@ -67,14 +67,14 @@ def load_labels(label_filename):
             
 
 class DenseNet(nn.Module):
-    def __init__(self, features=128, p=0.1):
+    def __init__(self, outputs, features=128, p=0.1):
         super(DenseNet, self).__init__()
-        self.model = models.densenet121(pretrained=True).cuda()
+        self.model = models.densenet121(pretrained=True, drop_rate=p).cuda()
         self.model.classifier = nn.Linear(self.model.classifier.in_features, features)
         self.relu = nn.ReLU()
         self.bn = nn.BatchNorm2d(features)
         self.dropout = nn.Dropout(p=p)
-        self.dense = nn.Linear(features, 3)
+        self.dense = nn.Linear(features, outputs)
         self.softmax = nn.Softmax()
 
     def forward(self, X):
@@ -121,12 +121,12 @@ def correct(outputs, targets):
         
 if __name__ == "__main__":
     batch_size = 24
-    lr = 0.005
+    lr = 0.0005
     leaf_train, leaf_valid = get_train_test("data/img", "data/chlorophyll_classes.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-    model = DenseNet().cuda()
+    model = DenseNet(3, p=0.2).cuda()
     # criterion = nn.MSELoss()
     criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
