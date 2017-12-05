@@ -11,10 +11,11 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 
-epochs = 10
+epochs = 100
 
 transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
+    transforms.RandomVerticalFlip(),
     transforms.ToTensor(),
 ])
 
@@ -22,10 +23,10 @@ if __name__ == "__main__":
     train_set = PairedImageLoader("data/x_train", "data/y_train", transform=transform)
     valid_set = PairedImageLoader("data/x_valid", "data/y_valid", transform=transforms.ToTensor())
     trainloader  = DataLoader(train_set, batch_size=3, shuffle=True, num_workers=2, pin_memory=True)
-    validloader  = DataLoader(valid_set, batch_size=1, shuffle=False, num_workers=2, pin_memory=True)
+    validloader  = DataLoader(valid_set, batch_size=3, shuffle=False, num_workers=2, pin_memory=True)
 
     model = FCDenseNet(4, 12, drop_rate=0.0, n_classes=1).cuda()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0005)
     scheduler = ReduceLROnPlateau(optimizer, "min", factor=0.5, patience=5)
     criterion = nn.MSELoss()
 
@@ -33,7 +34,6 @@ if __name__ == "__main__":
         print("Epoch", i)
         total_loss = 0
         for j, (x, y) in enumerate(trainloader):
-            # y = (y.squeeze(1) * 255).type(torch.LongTensor)
             x, y = Variable(x.cuda()), Variable(y.cuda())
             optimizer.zero_grad()
             outputs = model(x)
@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
         total_loss = 0
         for j, (x, y) in enumerate(validloader):
-            # y = (y.squeeze(1) * 255).type(torch.LongTensor)
             x, y = Variable(x.cuda()), Variable(y.cuda())
             outputs = model(x)
             loss = criterion(outputs, y)
@@ -56,4 +55,6 @@ if __name__ == "__main__":
                 sample = outputs[k].data.cpu().squeeze().numpy() * 255
                 imsave("results/sample{}_{}.jpg".format(j, k), sample)
 
-        print("Valid loss:", total_loss / j )
+        print("Valid loss:", total_loss / j)
+
+        torch.save(model.state_dict(), "data/weights.pth")
