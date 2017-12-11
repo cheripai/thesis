@@ -75,7 +75,7 @@ class DenseNet(nn.Module):
         self.bn = nn.BatchNorm2d(features)
         self.dropout = nn.Dropout(p=p)
         self.dense = nn.Linear(features, outputs)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, X):
         output = self.dropout(self.bn(self.relu(self.model(X))))
@@ -122,7 +122,7 @@ def correct(outputs, targets):
 if __name__ == "__main__":
     batch_size = 24
     lr = 0.0005
-    leaf_train, leaf_valid = get_train_test("data/img", "data/chlorophyll_classes.txt")
+    leaf_train, leaf_valid = get_train_test("data/img", "data/ndvi_classes.txt")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
