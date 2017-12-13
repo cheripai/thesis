@@ -7,8 +7,8 @@ from torchvision import transforms
 class PairedImageLoader(Dataset):
     def __init__(self, x_dir, y_dir, transform=None):
         self.transform = transform
-        self.x_paths = [os.path.join(x_dir, f) for f in os.listdir(x_dir)]
-        self.y_paths = [os.path.join(y_dir, f) for f in os.listdir(y_dir)]
+        self.x_paths = sorted([os.path.join(x_dir, f) for f in os.listdir(x_dir)])
+        self.y_paths = sorted([os.path.join(y_dir, f) for f in os.listdir(y_dir)])
 
         if len(self.x_paths) != len(self.y_paths):
             raise Exception("Number of files in {} and {} do not match!".format(x_dir, y_dir))
