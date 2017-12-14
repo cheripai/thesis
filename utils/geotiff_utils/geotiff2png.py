@@ -6,6 +6,9 @@ from osgeo import gdal
 from scipy.misc import imsave
 
 
+MIN = -1.0
+MAX = 1.0
+
 def geotiff2arrays(fname):
     try:
         data = gdal.Open(fname)
@@ -16,14 +19,14 @@ def geotiff2arrays(fname):
         transparency = data.GetRasterBand(2).ReadAsArray()
     except:
         transparency = np.zeros(values.shape)
-        trasparency[:] = 255
+        transparency[:] = 255
     return values, transparency
 
 if __name__ == "__main__":
     infile = sys.argv[1]
     values, transparency = geotiff2arrays(infile)
 
-    bins = np.arange(-1.0, 1.0, 2 / 256)
+    bins = np.arange(MIN, MAX, (MAX-MIN) / 256)
     binner = lambda x: np.argmin(np.abs(bins-x))
     vbin = np.vectorize(binner)
 
