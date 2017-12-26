@@ -12,7 +12,7 @@ if __name__ == "__main__":
         os.makedirs(imageset_path)
 
     for root, dirs, files in os.walk(images_path):
-        fpaths = [os.path.join(root.split("/")[-1], f) for f in files]   
+        fpaths = [os.path.join(root.split("/")[-1], f).split(".")[0] for f in files]   
 
     shuffle(fpaths)
     
