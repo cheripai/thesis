@@ -115,7 +115,6 @@ def train():
     print('Loading Dataset...')
 
     dataset = LettuceDetection(args.voc_root, "train", SSDAugmentation(ssd_dim, means), AnnotationTransform())
-    # dataset = LettuceDetection(args.voc_root, "train", target_transform=AnnotationTransform())
 
     epoch_size = len(dataset) // args.batch_size
     print('Training SSD on', dataset.name)
