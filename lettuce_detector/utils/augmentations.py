@@ -107,8 +107,7 @@ class Resize(object):
         self.size = size
 
     def __call__(self, image, boxes=None, labels=None):
-        image = cv2.resize(image, (self.size,
-                                 self.size))
+        image = cv2.resize(image, (self.size, self.size))
         return image, boxes, labels
 
 
@@ -398,6 +397,14 @@ class PhotometricDistort(object):
         return self.rand_light_noise(im, boxes, labels)
 
 
+class BlackBorders(object):
+    def __call__(self, image, boxes, labels):
+        max_dim = max(image.shape)
+        img = np.zeros((max_dim, max_dim, 3))
+        img[:image.shape[0], :image.shape[1], :image.shape[2]] = image
+        return img, boxes, labels
+
+
 class SSDAugmentation(object):
     def __init__(self, size=300, mean=(104, 117, 123)):
         self.mean = mean
@@ -409,6 +416,7 @@ class SSDAugmentation(object):
             Expand(self.mean),
             RandomSampleCrop(),
             RandomMirror(),
+            BlackBorders(),
             ToPercentCoords(),
             Resize(self.size),
             SubtractMeans(self.mean)
