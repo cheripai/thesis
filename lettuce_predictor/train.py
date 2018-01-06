@@ -64,19 +64,45 @@ def get_train_test(img_dir, p=0.2):
 
 
 class DenseNet(nn.Module):
-    def __init__(self, outputs, features=128, p=0.1):
+    def __init__(self, outputs, p=0.1):
         super(DenseNet, self).__init__()
-        self.model = models.densenet121(pretrained=True, drop_rate=p).cuda()
-        self.model.classifier = nn.Linear(self.model.classifier.in_features, features)
-        self.relu = nn.ReLU()
-        self.bn = nn.BatchNorm2d(features)
-        self.dropout = nn.Dropout(p=p)
-        self.dense = nn.Linear(features, outputs)
-        self.softmax = nn.LogSoftmax(dim=-1)
+        self.model = models.densenet161(pretrained=True, drop_rate=p).cuda()
+        self.model.classifier = nn.Sequential(
+            nn.Dropout(p=p),
+            nn.Linear(self.model.classifier.in_features, 1024),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(1024),
+            nn.Dropout(p=p),
+            nn.Linear(1024, 128),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(128),
+            nn.Linear(128, outputs),
+            nn.LogSoftmax(dim=-1),
+        )
 
     def forward(self, X):
-        output = self.dropout(self.bn(self.relu(self.model(X))))
-        return self.softmax(self.dense(output))
+        return self.model(X)
+
+
+class ResNet(nn.Module):
+    def __init__(self, outputs, p=0.1):
+        super(ResNet, self).__init__()
+        self.model = models.resnet50(pretrained=True).cuda()
+        self.model.fc = nn.Sequential(
+            nn.Dropout(p=p),
+            nn.Linear(self.model.fc.in_features, 1024),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(1024),
+            nn.Dropout(p=p),
+            nn.Linear(1024, 128),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(128),
+            nn.Linear(128, outputs),
+            nn.LogSoftmax(dim=-1),
+        )
+            
+    def forward(self, X):
+        return self.model(X)
 
 
 class VGG(nn.Module):
@@ -108,14 +134,15 @@ def correct(outputs, targets):
 
         
 if __name__ == "__main__":
-    batch_size = 16
+    batch_size = 8
     lr = 0.0001
     leaf_train, leaf_valid = get_train_test("data/img")
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-    model = DenseNet(len(CLASSES), features=256, p=0.15).cuda()
+    model = DenseNet(len(CLASSES), p=0.15).cuda()
     # model = VGG(len(CLASSES), p=0.15).cuda()
+    # model = ResNet(len(CLASSES), p=0.2).cuda()
     criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
