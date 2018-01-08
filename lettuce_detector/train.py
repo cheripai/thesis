@@ -24,9 +24,13 @@ if __name__ == "__main__":
         num_workers=4,
         pin_memory=True)
 
-    model = SimpleNet(2).cuda()
-    criterion = nn.NLLLoss().cuda()
+    model = SimpleNet(2)
+    criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    if cfg.use_cuda:
+        model = model.cuda()
+        criterion = criterion.cuda()
 
     print("Learning rate: {}".format(lr))
 
@@ -37,7 +41,10 @@ if __name__ == "__main__":
         train_acc = 0
         count = 0
         for X, y in train_loader:
-            X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
+            X, y = Variable(X), Variable(y.type(torch.LongTensor))
+            if cfg.use_cuda:
+                X = X.cuda()
+                y = y.cuda()
             optimizer.zero_grad()
             outputs = model(X)
             loss = criterion(outputs, y)
@@ -53,7 +60,10 @@ if __name__ == "__main__":
         valid_acc = 0
         count = 0
         for X, y in valid_loader:
-            X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
+            X, y = Variable(X), Variable(y.type(torch.LongTensor))
+            if cfg.use_cuda:
+                X = X.cuda()
+                y = y.cuda()
             outputs = model(X)
             loss = criterion(outputs, y)
             valid_loss += loss.data[0]

@@ -1,3 +1,4 @@
+import torch
 from torchvision import transforms
 
 # Path to store model
