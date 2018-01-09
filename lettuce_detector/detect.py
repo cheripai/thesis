@@ -1,4 +1,5 @@
 import config as cfg
+import numpy as np
 import sys
 import torch
 from argparse import ArgumentParser
@@ -23,9 +24,15 @@ if __name__ == "__main__":
         print("Error: Model not found at '{}'".format(cfg.model_path))
         print("Check the path in config.py or run train.py to generate a model")
 
-    if cfg.use_cuda: model = model.cuda()
-
+    j = 0
     boxes = []
+    cur_boxes = []
+    windows = Variable(torch.zeros((cfg.batch_size, 3, cfg.img_size, cfg.img_size)))
+
+    if cfg.use_cuda:
+        model = model.cuda()
+        windows = windows.cuda()
+
     # Slides window across image running classifier on each window
     for i, resized in enumerate(pyramid(image, cfg.scale_amt)):
         for (x, y, window) in sliding_window(resized, cfg.step_size, window_size=(cfg.win_width, cfg.win_height)):
@@ -33,14 +40,20 @@ if __name__ == "__main__":
                 continue
 
             # imwrite("tmp/" +''.join(random.choices(string.ascii_uppercase + string.digits, k=4))+".jpg", window)
-            # TODO: Load in batches
-            X = Variable(cfg.data_transforms["valid"](Image.fromarray(window)))
-            X = X.unsqueeze(0)
-            if cfg.use_cuda: X = X.cuda()
+            window = cfg.data_transforms["valid"](Image.fromarray(window))
+            if cfg.use_cuda: window = window.cuda()
 
-            _, prediction = model(X).data.topk(1)
-            if int(prediction) == 1:
-                boxes.append((x, y, x + cfg.win_width * cfg.scale_amt**i, y + cfg.win_height * cfg.scale_amt**i))
+            windows[j] = window
+            j += 1
+
+            cur_boxes.append((x, y, x + cfg.win_width * cfg.scale_amt**i, y + cfg.win_height * cfg.scale_amt**i))
+
+            if j == cfg.batch_size:
+                _, predictions = model(windows).data.topk(1)
+                predictions_indexes = np.where(predictions.cpu().numpy().ravel() == 1)[0]
+                boxes += list(cur_boxes[i] for i in predictions_indexes)
+                cur_boxes = []
+                j = 0
 
     # Remove redundant boxes
     boxes = non_max_suppression(boxes, cfg.overlap_thresh)
