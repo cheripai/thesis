@@ -35,3 +35,4 @@ data_transforms = {
 }
 
 use_cuda = torch.cuda.is_available()
+batch_size = 32
