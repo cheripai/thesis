@@ -1,9 +1,10 @@
 import config as cfg
+import json
 import numpy as np
 import sys
 import torch
 from argparse import ArgumentParser
-from cv2 import imread, imwrite, rectangle
+from cv2 import imread
 from models.simplenet import SimpleNet
 from os import path
 from PIL import Image
@@ -57,11 +58,18 @@ if __name__ == "__main__":
 
     # Remove redundant boxes
     boxes = non_max_suppression(boxes, cfg.overlap_thresh)
+    boxes = sorted(boxes, key=lambda box: box[0])
 
-    # TODO: Write json file for bounding boxes so user can use sloth to fix
-    for (x1, y1, x2, y2) in boxes:
-        rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    old_path = path.split(image_path)[1].split(".")
-    new_path = old_path[0] + "_boxed." + old_path[1]
-    imwrite(new_path, image)
-    print("Saved as {}".format(new_path))
+    annotation_json = {
+        "class": "image",
+        "filename": image_path,
+        "annotations": [{
+            "class": "rect",
+            "height": int(y2 - y1),
+            "width": int(x2 - x1),
+            "x": int(x1),
+            "y": int(y1)
+        } for (x1, y1, x2, y2) in boxes]
+    }
+    with open("annotations.json", "w") as f:
+        f.write(json.dumps([annotation_json]))
