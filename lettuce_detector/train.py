@@ -9,17 +9,16 @@ from torchvision.datasets import ImageFolder
 from utils import num_correct
 
 if __name__ == "__main__":
-    batch_size = 32
     lr = 0.001
     train_loader = DataLoader(
         ImageFolder(cfg.train_path, cfg.data_transforms["train"]),
-        batch_size=batch_size,
+        batch_size=cfg.batch_size,
         shuffle=True,
         num_workers=4,
         pin_memory=True)
     valid_loader = DataLoader(
         ImageFolder(cfg.valid_path, cfg.data_transforms["valid"]),
-        batch_size=batch_size,
+        batch_size=cfg.batch_size,
         shuffle=False,
         num_workers=4,
         pin_memory=True)

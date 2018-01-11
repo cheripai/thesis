@@ -15,23 +15,27 @@ step_size = 4
 scale_amt = 1.25
 
 # Overlap threshold for NMS
-overlap_thresh = 0.1
+overlap_thresh = 0.2
+
+# Model Configuration
+use_cuda = torch.cuda.is_available()
+batch_size = 32
+img_size = 64
 
 data_transforms = {
     "train":
     transforms.Compose([
-        transforms.Resize(70),
-        transforms.RandomCrop(64),
+        transforms.Resize(int(img_size*1.1)),
+        transforms.RandomCrop(img_size),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
         transforms.ToTensor(),
     ]),
     "valid":
     transforms.Compose([
-        transforms.Resize(64),
-        transforms.CenterCrop(64),
+        transforms.Resize(img_size),
+        transforms.CenterCrop(img_size),
         transforms.ToTensor(),
     ]),
 }
 
-use_cuda = torch.cuda.is_available()
