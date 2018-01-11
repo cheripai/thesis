@@ -38,4 +38,3 @@ data_transforms = {
         transforms.ToTensor(),
     ]),
 }
-
