@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     print("Learning rate: {}".format(lr))
 
-    epochs = 5
+    epochs = 10
     for i in range(epochs):
         print("Epoch", i)
         train_loss = 0
