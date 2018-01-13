@@ -4,18 +4,20 @@ from torchvision import transforms
 # Path to store model
 weights_path = 'data/weights.pth'
 
-train_path = 'data/Lettuce_Equal/train'
-valid_path = 'data/Lettuce_Equal/valid'
+# train_path = 'data/Lettuce_Between/train'
+# valid_path = 'data/Lettuce_Between/valid'
+train_path = 'data/LettuceV2/train'
+valid_path = 'data/LettuceV2/valid'
 
 # Sliding window parameters
-(win_width, win_height) = (40, 40)
-step_size = 4
+(win_width, win_height) = (60, 60)
+step_size = 2
 
 # Pyramid scale amount
 scale_amt = 1.25
 
 # Overlap threshold for NMS
-overlap_thresh = 0.2
+overlap_thresh = 0.10
 
 # Model Configuration
 use_cuda = torch.cuda.is_available()
