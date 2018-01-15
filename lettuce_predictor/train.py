@@ -71,11 +71,9 @@ class DenseNet(nn.Module):
             nn.Dropout(p=p),
             nn.Linear(self.model.classifier.in_features, 1024),
             nn.ReLU(inplace=True),
-            nn.BatchNorm1d(1024),
             nn.Dropout(p=p),
             nn.Linear(1024, 128),
             nn.ReLU(inplace=True),
-            nn.BatchNorm1d(128),
             nn.Linear(128, outputs),
             nn.LogSoftmax(dim=-1),
         )
