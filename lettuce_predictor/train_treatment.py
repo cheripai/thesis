@@ -2,13 +2,13 @@ import numpy as np
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
+from networks import DenseNet
 from PIL import Image
 from sklearn.utils import shuffle
 from torch.autograd import Variable
 from torch.utils.data import Dataset, DataLoader
-from torchvision import models, transforms
+from torchvision import transforms
 
 
 #CLASSES = ["N100IR100", "N100IR50", "N100IR25", "N100IR0",
@@ -63,68 +63,6 @@ def get_train_test(img_dir, p=0.2):
         return TreatmentDataset(img_paths[split:], labels[split:], "train"), TreatmentDataset(img_paths[:split], labels[:split], "valid")
 
 
-class DenseNet(nn.Module):
-    def __init__(self, outputs, p=0.1):
-        super(DenseNet, self).__init__()
-        self.model = models.densenet161(pretrained=True, drop_rate=p).cuda()
-        self.model.classifier = nn.Sequential(
-            nn.Dropout(p=p),
-            nn.Linear(self.model.classifier.in_features, 1024),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=p),
-            nn.Linear(1024, 128),
-            nn.ReLU(inplace=True),
-            nn.Linear(128, outputs),
-            nn.LogSoftmax(dim=-1),
-        )
-
-    def forward(self, X):
-        return self.model(X)
-
-
-class ResNet(nn.Module):
-    def __init__(self, outputs, p=0.1):
-        super(ResNet, self).__init__()
-        self.model = models.resnet50(pretrained=True).cuda()
-        self.model.fc = nn.Sequential(
-            nn.Dropout(p=p),
-            nn.Linear(self.model.fc.in_features, 1024),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(1024),
-            nn.Dropout(p=p),
-            nn.Linear(1024, 128),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, outputs),
-            nn.LogSoftmax(dim=-1),
-        )
-            
-    def forward(self, X):
-        return self.model(X)
-
-
-class VGG(nn.Module):
-    def __init__(self, outputs, p=0.1):
-        super(VGG, self).__init__()
-        self.model = models.vgg16_bn(pretrained=True).features
-        self.classifier = nn.Sequential(
-            nn.Dropout(p=p),
-            nn.Linear(25088, 4096),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(4096),
-            nn.Dropout(p=p),
-            nn.Linear(4096, 1024),
-            nn.ReLU(inplace=True),
-            nn.BatchNorm1d(1024),
-            nn.Linear(1024, outputs),
-            nn.LogSoftmax(dim=-1),
-        )
-
-    def forward(self, X):
-        output = self.model(X)
-        output = output.view(output.size(0), -1)
-        return self.classifier(output)
-
 
 def correct(outputs, targets):
     _, outputs = torch.max(outputs.data, -1)
@@ -139,8 +77,6 @@ if __name__ == "__main__":
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
     model = DenseNet(len(CLASSES), p=0.15).cuda()
-    # model = VGG(len(CLASSES), p=0.15).cuda()
-    # model = ResNet(len(CLASSES), p=0.2).cuda()
     criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
