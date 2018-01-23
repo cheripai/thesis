@@ -22,7 +22,7 @@ if __name__ == "__main__":
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
         img = np.asarray(Image.open(sys.argv[i + 1]), dtype=np.uint8)
-        h, w, _ = img.shape
+        h, w = img.shape[:2]
         max_patches = int(1.5 * h * w / patch_size**2)
         patches = extract_patches_2d(img, patch_size=(patch_size, patch_size), max_patches=max_patches, random_state=seed)
         for j in range(patches.shape[0]):
