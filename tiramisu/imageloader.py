@@ -1,3 +1,4 @@
+import numpy as np
 import os
 from PIL import Image
 from torch.utils.data import Dataset
@@ -17,9 +18,14 @@ class PairedImageLoader(Dataset):
         x = Image.open(self.x_paths[index]).convert("RGB")
         y = Image.open(self.y_paths[index]).convert("L")
 
+        joined = x.copy()
+        joined.putalpha(y)
+
         if self.transform is not None:
-            x = self.transform(x)
-            y = self.transform(y)
+            joined = self.transform(joined)
+
+        x = joined[:3, :, :]
+        y = joined[-1, :, :]
 
         return x, y
 

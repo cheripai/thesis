@@ -13,9 +13,9 @@ WEIGHTS_PATH = "data/weights.pth"
 
 if __name__ == "__main__":
     eval_set = PairedImageLoader(X_PATH, Y_PATH, transform=transforms.ToTensor())
-    loader = DataLoader(eval_set, batch_size=1, shuffle=False, num_workers=2, pin_memory=True)
+    loader = DataLoader(eval_set, batch_size=3, shuffle=False, num_workers=2, pin_memory=True)
 
-    model = FCDenseNet(4, 12, drop_rate=0.0, n_classes=1).cuda()
+    model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1).cuda()
     model.load_state_dict(torch.load(WEIGHTS_PATH))
     criterion = nn.L1Loss()
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     for j, (x, y) in enumerate(loader):
         x, y = Variable(x.cuda()), Variable(y.cuda())
         outputs = model(x)
-        loss = criterion(outputs * 256, y * 256)
+        loss = criterion(outputs * 255, y * 255)
         total_loss += loss.data[0]
 
     print("MAE per pixel:", total_loss / (j + 1))
