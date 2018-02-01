@@ -58,7 +58,7 @@ class ResNet(nn.Module):
 class VGG(nn.Module):
     def __init__(self, outputs, p=0.1):
         super(VGG, self).__init__()
-        self.model = models.vgg16_bn(pretrained=False).features
+        self.model = models.vgg16_bn(pretrained=True).features
         self.classifier = nn.Sequential(
             nn.Dropout(p=p),
             nn.Linear(25088, 4096),
@@ -78,26 +78,83 @@ class VGG(nn.Module):
         return self.classifier(output)
 
 
-class SimpleNet(nn.Module):
+class RasterNet(nn.Module):
     def __init__(self, n_classes, mode="classification"):
-        super(SimpleNet, self).__init__()
+        super(RasterNet, self).__init__()
         self.mode = mode
         self.conv = nn.Sequential(
-            nn.Conv2d(3, 16, 7, stride=2, padding=3),
-            nn.Dropout(p=0.1),
-            nn.ELU(inplace=True),
-            nn.Conv2d(16, 32, 5, stride=2, padding=2),
-            nn.Dropout(p=0.1),
-            nn.ELU(inplace=True),
-            nn.Conv2d(32, 64, 5, stride=2, padding=2),
-            nn.Dropout(p=0.2),
-            nn.ELU(inplace=True),
-            nn.Conv2d(64, 128, 5, stride=2, padding=2),
-            nn.Dropout(p=0.2),
-            nn.ELU(inplace=True),
+            nn.Conv2d(5, 32, 3, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.Dropout(p=0.11),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 64, 3, stride=2, padding=1),
+            nn.BatchNorm2d(64),
+            nn.Dropout(p=0.11),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 256, 3, stride=2, padding=1),
+            nn.BatchNorm2d(256),
+            nn.Dropout(p=0.12),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 512, 3, stride=2, padding=1),
+            nn.Dropout(p=0.15),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
         )
 
-        self.fc = nn.Sequential(nn.Linear(128, n_classes))
+        self.fc = nn.Sequential(
+            nn.Linear(512, 1024),
+            nn.Dropout(p=0.2),
+            nn.BatchNorm1d(1024),
+            nn.ReLU(inplace=True),
+            nn.Linear(1024, n_classes),
+        )
+
+    def forward(self, X):
+        output = self.conv(X)
+        output = torch.mean(output.view(output.size(0), output.size(1), -1), dim=2)
+        output = self.fc(output)
+
+        if self.mode == "classification":
+            return F.log_softmax(output, dim=-1)
+        elif self.mode == "regression":
+            return F.sigmoid(output)
+        else:
+            raise Exception("Invalid mode: {}".format(self.mode))
+
+class RasterNetPlus(nn.Module):
+    def __init__(self, n_classes, mode="classification"):
+        super(RasterNetPlus, self).__init__()
+        self.mode = mode
+        self.conv = nn.Sequential(
+            nn.Conv2d(5, 32, 3, stride=1, padding=1),
+            nn.BatchNorm2d(32),
+            nn.Dropout(p=0.11),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 64, 3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.Dropout(p=0.11),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 256, 3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.Dropout(p=0.12),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 512, 3, stride=1, padding=1),
+            nn.Dropout(p=0.15),
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True),
+        )
+
+        self.fc = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.Dropout(p=0.25),
+            nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
+            nn.Linear(512, 512),
+            nn.Dropout(p=0.25),
+            nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
+            nn.Linear(512, n_classes),
+        )
 
     def forward(self, X):
         output = self.conv(X)

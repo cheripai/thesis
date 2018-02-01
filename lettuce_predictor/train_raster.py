@@ -5,7 +5,7 @@ import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from networks import DenseNet, RasterNet
+from networks import RasterNet, RasterNetPlus
 from PIL import Image
 from sklearn.utils import shuffle
 from torch.autograd import Variable
@@ -14,7 +14,11 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.transforms.functional import hflip, vflip
 
-CLASSES = ["IR100", "IR50", "IR25", "IR0"]
+CLASSES = ["N100IR100", "N100IR50", "N100IR25", "N100IR0",
+           "N50IR100", "N50IR50", "N50IR25", "N50IR0",
+           "N25IR100", "N25IR50", "N25IR25", "N25IR0",
+           "N0IR100", "N0IR50", "N0IR25", "N0IR0"]
+# CLASSES = ["IR100", "IR50", "IR25", "IR0"]
 # CLASSES = ["N100", "N50", "N25", "N0"]
 CHANNELS = 5
 SIZE = 16
@@ -74,9 +78,10 @@ def get_train_test(root_dir, p=0.15):
     img_paths = []
     for img_dir in os.listdir(root_dir):
         img_dir = os.path.join(root_dir, img_dir)
-        img_paths += [os.path.join(img_dir, name) for name in os.listdir(img_dir) if name.endswith("npy")]
+        img_paths += [os.path.join(img_dir, name) for name in os.listdir(img_dir) if name.endswith("npy") and not "N25IR0Rep3" in name and not "N25IR50Rep3" in name or not "N25IR25Rep3" in name]
     # labels = [CLASSES.index(img_path.split("/")[-1].split("IR")[0]) for img_path in img_paths]
-    labels = [CLASSES.index("IR" + img_path.split("IR")[-1].split("Rep")[0]) for img_path in img_paths]
+    # labels = [CLASSES.index("IR" + img_path.split("IR")[-1].split("Rep")[0]) for img_path in img_paths]
+    labels = [CLASSES.index(img_path.split("/")[-1].split("Rep")[0]) for img_path in img_paths]
     img_paths, labels = shuffle(img_paths, labels)
     split = int(len(img_paths) * p)
     return TreatmentDataset(img_paths[split:], labels[split:], "train"), TreatmentDataset(
@@ -116,14 +121,15 @@ def correct(outputs, targets):
 if __name__ == "__main__":
     batch_size = 32
     lr = 0.0001
-    train_set, valid_set = get_train_test_csv("data/rasters_csv", "WP")
-    # train_set, valid_set = get_train_test("data/rasters")
+    # train_set, valid_set = get_train_test_csv("data/rasters_csv", "WP")
+    train_set, valid_set = get_train_test("data/rasters")
     print("Train Images:", len(train_set))
     print("Valid Images:", len(valid_set))
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-    model = RasterNet(2).cuda()
+    # model = RasterNet(2).cuda()
+    model = RasterNetPlus(16).cuda()
     criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = ReduceLROnPlateau(optimizer, "min", factor=0.5, patience=5)
