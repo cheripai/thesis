@@ -7,14 +7,14 @@ from rotate_and_crop import rotate, find_crop
 from scipy.misc import imsave
 
 """
-Blue:    475-500
-Green:   550-570
-Red:     670-680
-RedEdge: 720-730
-NIR:     825-860
+Blue: 475 nm
+Green: 560 nm
+Red: 668 nm
+Red Edge: 717 nm
+NIR: 840 nm
 """
 
-ROTATION = 42.7
+ROTATION = 39.5
 EPSILON = 1e-20
 MIN = -1
 MAX = 1
@@ -31,6 +31,8 @@ def EVI(B, R, NIR):
 def MCARI(G, R, RE):
     return (RE - R) - 0.23 * (RE - G) * RE / (R + EPSILON)
 
+def GNDVI(G, NIR):
+    return (NIR - G) / (NIR + G + EPSILON)
 
 def geotiff2arrays(fname):
     try:
@@ -61,6 +63,7 @@ if __name__ == "__main__":
     transparency[np.where(transparency > 0)] = 255
     x, y, w, h = find_crop(transparency.astype(np.uint8))
     rasters = rasters[y:y+h, x:x+w]
+    np.save("rasters.npy", rasters)
 
     B, G, R, RE, NIR = rasters[:,:,0], rasters[:,:,1], rasters[:,:,2], rasters[:,:,3], rasters[:,:,4]
 
@@ -78,8 +81,10 @@ if __name__ == "__main__":
     re = vbin(RedEdge(R, RE))
     evi = vbin(EVI(B, R, NIR))
     mcari = vbin(MCARI(G, R, RE))
+    gndvi = vbin(GNDVI(G, NIR))
 
     imsave("ndvi.png", ndvi)
     imsave("re.png", re)
     imsave("evi.png", evi)
     imsave("mcari.png", mcari)
+    imsave("gndvi.png", gndvi)
