@@ -18,13 +18,11 @@ CLASSES = ["N100IR100", "N100IR50", "N100IR25", "N100IR0",
            "N50IR100", "N50IR50", "N50IR25", "N50IR0",
            "N25IR100", "N25IR50", "N25IR25", "N25IR0",
            "N0IR100", "N0IR50", "N0IR25", "N0IR0"]
-# CLASSES = ["IR100", "IR50", "IR25", "IR0"]
-# CLASSES = ["N100", "N50", "N25", "N0"]
 CHANNELS = 5
 SIZE = 16
 
 
-class TreatmentDataset(Dataset):
+class RasterDataset(Dataset):
     def __init__(self, img_paths, labels, mode="valid"):
 
         self.img_paths = img_paths
@@ -84,7 +82,7 @@ def get_train_test(root_dir, p=0.15):
     labels = [CLASSES.index(img_path.split("/")[-1].split("Rep")[0]) for img_path in img_paths]
     img_paths, labels = shuffle(img_paths, labels)
     split = int(len(img_paths) * p)
-    return TreatmentDataset(img_paths[split:], labels[split:], "train"), TreatmentDataset(
+    return RasterDataset(img_paths[split:], labels[split:], "train"), RasterDataset(
         img_paths[:split], labels[:split], "valid")
 
 
@@ -109,8 +107,8 @@ def get_train_test_csv(csv_dir, target_col, p=0.15):
     labels = [int(label < mean) for label in labels]
 
     split = int(p * len(img_paths))
-    return TreatmentDataset(
-        img_paths[split:], labels[split:], mode="train"), TreatmentDataset(img_paths[:split], labels[:split])
+    return RasterDataset(
+        img_paths[split:], labels[split:], mode="train"), RasterDataset(img_paths[:split], labels[:split])
 
 
 def correct(outputs, targets):
