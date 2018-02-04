@@ -121,6 +121,7 @@ class RasterNet(nn.Module):
         else:
             raise Exception("Invalid mode: {}".format(self.mode))
 
+
 class RasterNetPlus(nn.Module):
     def __init__(self, n_classes, mode="classification"):
         super(RasterNetPlus, self).__init__()
@@ -155,11 +156,11 @@ class RasterNetPlus(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Linear(2048, 1024),
-            nn.Dropout(p=0.20),
+            nn.Dropout(p=0.15),
             nn.BatchNorm1d(1024),
             nn.ReLU(inplace=True),
             nn.Linear(1024, 512),
-            nn.Dropout(p=0.20),
+            nn.Dropout(p=0.15),
             nn.BatchNorm1d(512),
             nn.ReLU(inplace=True),
             nn.Linear(512, n_classes),
