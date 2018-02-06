@@ -1,3 +1,4 @@
+import config as c
 import numpy as np
 import torch
 import torch.nn as nn
@@ -9,14 +10,14 @@ from torchvision import transforms
 
 X_PATH = "data/x_valid"
 Y_PATH = "data/y_valid"
-WEIGHTS_PATH = "data/weights.pth"
 
 if __name__ == "__main__":
     eval_set = PairedImageLoader(X_PATH, Y_PATH, transform=transforms.ToTensor())
-    loader = DataLoader(eval_set, batch_size=3, shuffle=False, num_workers=2, pin_memory=True)
+    loader = DataLoader(eval_set, batch_size=c.BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
 
     model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1).cuda()
-    model.load_state_dict(torch.load(WEIGHTS_PATH))
+    model.load_state_dict(torch.load(c.WEIGHTS_PATH))
+    model.train(False)
     criterion = nn.L1Loss()
 
     total_loss = 0
