@@ -18,8 +18,9 @@ if __name__ == "__main__":
         src_widths.append(src_img.shape[1])
 
     for img_path in os.listdir(tgt_img_dir):
-        tgt_img = np.array(Image.open(os.path.join(tgt_img_dir, img_path)))
-        tgt_widths.append(tgt_img.shape[1])
+        if img_path.endswith("png"):
+            tgt_img = np.array(Image.open(os.path.join(tgt_img_dir, img_path)))
+            tgt_widths.append(tgt_img.shape[1])
 
     avg_src_width = np.average(src_widths)
     avg_tgt_width = np.average(tgt_widths)
