@@ -55,7 +55,7 @@ class TreatmentDataset(Dataset):
         return img, self.labels[idx]
 
 
-def get_train_test(img_dir, p=0.2):
+def get_train_test(img_dir, p=0.15):
         img_paths = [os.path.join(img_dir, name) for name in os.listdir(img_dir) if name.endswith("png")]
         labels = [CLASSES.index("IR"+img_path.split("IR")[-1].split("Rep")[0]) for img_path in img_paths]
         img_paths, labels = shuffle(img_paths, labels)
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(leaf_train, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(leaf_valid, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-    model = DenseNet(len(CLASSES), p=0.15).cuda()
+    model = DenseNet(len(CLASSES), p=0.05).cuda()
     criterion = nn.NLLLoss().cuda()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
