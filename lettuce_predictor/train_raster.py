@@ -72,7 +72,7 @@ def normalize(xs):
     return [(x - min_x) / (max_x - min_x) for x in xs]
 
 
-def get_train_test(root_dir, p=0.15):
+def get_train_valid_test(root_dir, p=0.15):
     img_paths = []
     for img_dir in os.listdir(root_dir):
         img_dir = os.path.join(root_dir, img_dir)
@@ -82,11 +82,10 @@ def get_train_test(root_dir, p=0.15):
     labels = [CLASSES.index(img_path.split("/")[-1].split("Rep")[0]) for img_path in img_paths]
     img_paths, labels = shuffle(img_paths, labels)
     split = int(len(img_paths) * p)
-    return RasterDataset(img_paths[split:], labels[split:], "train"), RasterDataset(
-        img_paths[:split], labels[:split], "valid")
+    return RasterDataset(img_paths[split*2:], labels[split*2:], "train"), RasterDataset(img_paths[:split], labels[:split], "valid"), RasterDataset(img_paths[split:split*2], labels[split:split*2], "valid")
 
 
-def get_train_test_csv(csv_dir, target_col, p=0.15):
+def get_train_valid_test_csv(csv_dir, target_col, p=0.15):
     img_paths = []
     labels = []
     for csv_path in os.listdir(csv_dir):
@@ -107,24 +106,25 @@ def get_train_test_csv(csv_dir, target_col, p=0.15):
     labels = [int(label < mean) for label in labels]
 
     split = int(p * len(img_paths))
-    return RasterDataset(
-        img_paths[split:], labels[split:], mode="train"), RasterDataset(img_paths[:split], labels[:split])
+    return RasterDataset(img_paths[split*2:], labels[split*2:], "train"), RasterDataset(img_paths[:split], labels[:split], "valid"), RasterDataset(img_paths[split:split*2], labels[split:split*2], "valid")
 
 
 def correct(outputs, targets):
     _, outputs = torch.max(outputs.data, -1)
-    return torch.sum(outputs == targets.data)
+    return int(torch.sum(outputs == targets.data))
 
 
 if __name__ == "__main__":
     batch_size = 32
     lr = 0.0001
-    # train_set, valid_set = get_train_test_csv("data/rasters_csv", "WP")
-    train_set, valid_set = get_train_test("data/rasters")
+    # train_set, valid_set, test_set = get_train_valid_test_csv("data/rasters_csv", "Average Leaf Count")
+    train_set, valid_set, test_set = get_train_valid_test("data/rasters")
     print("Train Images:", len(train_set))
     print("Valid Images:", len(valid_set))
+    print("Test Images:", len(test_set))
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    test_loader = DataLoader(test_set, batch_size=1, shuffle=False, num_workers=4, pin_memory=True)
 
     # model = RasterNet(2).cuda()
     model = RasterNetPlus(16).cuda()
@@ -168,7 +168,16 @@ if __name__ == "__main__":
             valid_acc += correct(outputs, y)
             count += X.size(0)
         valid_acc /= count
-        if valid_acc > top_acc:
+
+        if valid_acc >= top_acc:
+            test_acc = 0
             top_acc = valid_acc
+            for X, y in test_loader:
+                X, y = Variable(X.cuda()), Variable(y.type(torch.LongTensor).cuda())
+                outputs = model(X)
+                test_acc += correct(outputs, y)
+            test_acc /= len(test_set)
         print("Valid Loss {} Valid Accuracy {}".format(round(valid_loss, 4), round(valid_acc, 4)))
-    print("Top Accuracy {}".format(round(top_acc, 4)))
+
+    print("Top Valid Accuracy {}".format(round(top_acc, 4)))
+    print("Test Accuracy {}".format(round(test_acc, 4)))
