@@ -2,7 +2,7 @@ import config as cfg
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models.simplenet import SimpleNet
+from detectornet import DetectorNet
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
@@ -23,7 +23,7 @@ if __name__ == "__main__":
         num_workers=4,
         pin_memory=True)
 
-    model = SimpleNet(2)
+    model = DetectorNet(2)
     criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 

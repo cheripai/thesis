@@ -6,7 +6,7 @@ import sys
 import torch
 from argparse import ArgumentParser
 from cv2 import imread
-from models.simplenet import SimpleNet
+from detectornet import DetectorNet
 from PIL import Image
 from skimage import color
 from torch.autograd import Variable
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     in_path = sys.argv[1]
     out_path = sys.argv[2]
     try:
-        model = SimpleNet(2)
+        model = DetectorNet(2)
         model.load_state_dict(torch.load(cfg.weights_path))
     except:
         print("Error: Model not found at '{}'".format(cfg.model_path))
