@@ -83,30 +83,40 @@ class RasterNet(nn.Module):
         super(RasterNet, self).__init__()
         self.mode = mode
         self.conv = nn.Sequential(
+            # 16x16x5
             nn.Conv2d(5, 32, 3, stride=2, padding=1),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.1),
+            nn.Dropout(p=0.05),
+            # 8x8x32
             nn.Conv2d(32, 64, 3, stride=2, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.1),
-            nn.Conv2d(64, 256, 3, stride=2, padding=1),
+            nn.Dropout(p=0.05),
+            # 4x4x64
+            nn.Conv2d(64, 128, 3, stride=2, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.05),
+            # 2x2x128
+            nn.Conv2d(128, 256, 1, stride=1, padding=0),
             nn.BatchNorm2d(256),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.1),
-            nn.Conv2d(256, 512, 3, stride=2, padding=1),
+            nn.Dropout(p=0.05),
+            # 2x2x256
+            nn.Conv2d(256, 512, 1, stride=1, padding=0),
             nn.BatchNorm2d(512),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.15),
+            nn.Dropout(p=0.05),
+            # 2x2x512
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(512, 1024),
-            nn.BatchNorm1d(1024),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.2),
-            nn.Linear(1024, n_classes),
+            nn.Dropout(p=0.15),
+            nn.Linear(256, n_classes),
         )
 
     def forward(self, X):
