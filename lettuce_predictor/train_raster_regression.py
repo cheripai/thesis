@@ -40,7 +40,7 @@ def get_train_valid_test_csv(csv_dir, target_col, p=0.15):
 if __name__ == "__main__":
     batch_size = 32
     lr = 0.0001
-    value_name = "Average Leaf Count"
+    value_name = "Chlorophyll"
     train_set, valid_set, test_set = get_train_valid_test_csv("data/rasters_csv", value_name)
     print("Train Images:", len(train_set))
     print("Valid Images:", len(valid_set))
@@ -58,6 +58,8 @@ if __name__ == "__main__":
 
     epochs = 100
     top_acc = 0
+    test_loss = 0
+    best_loss = 1e10
     for i in range(epochs):
         print("Epoch", i)
         train_loss = 0
@@ -75,8 +77,6 @@ if __name__ == "__main__":
         print("Train Loss {}".format(round(np.sqrt(train_loss), 4)))
 
         valid_loss = 0
-        test_loss = 0
-        best_loss = 1e10
         model.train(False)
         for i, (X, y) in enumerate(valid_loader):
             X, y = Variable(X.cuda()), Variable(y.type(torch.FloatTensor).cuda())
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 ys[i] = y.data
                 yhats[i] = outputs.data
             test_loss /= len(test_set)
-            save_error_chart(ys, yhats, value_name, "results/{}.png".format(value_name))
+            # save_error_chart(ys, yhats, value_name, "results/{}.png".format(value_name))
         print("Valid Loss {}".format(round(np.sqrt(valid_loss), 4)))
 
     print("Best Valid Loss {}".format(round(np.sqrt(best_loss), 4)))
