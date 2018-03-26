@@ -19,6 +19,8 @@ from utils import normalize, save_error_chart
 CHANNELS = 3
 SIZE = 96
 
+# These have bad crops
+EXCLUDE_ID = ("26D", "35E", "42C", "44F")
 
 class RasterDataset(Dataset):
     def __init__(self, img_paths, labels, mode="valid"):
@@ -52,6 +54,7 @@ class RasterDataset(Dataset):
     def __getitem__(self, idx):
         arr = np.load(self.img_paths[idx])
         arr = arr[:,:,:CHANNELS]
+        arr = arr[10:-10, 10:-10, :]
         img = Image.fromarray(np.uint8(arr*255))
         img = img.convert("RGB")
         img = self.transform(img)
@@ -64,6 +67,8 @@ def get_train_valid_test_csv(csv_path, img_dir, target_col, p=0.15):
     with open(os.path.join(csv_path)) as f:
         reader = csv.DictReader(f)
         for row in reader:
+            if row["ID"] in EXCLUDE_ID:
+                continue
             try:
                 labels.append(float(row[target_col]))
                 img_paths.append(os.path.join(img_dir, row["ID"]+".npy"))
@@ -78,8 +83,8 @@ def get_train_valid_test_csv(csv_path, img_dir, target_col, p=0.15):
 
 if __name__ == "__main__":
     batch_size = 32
-    lr = 0.0001
-    value_name = "Chlorophyll"
+    lr = 0.0005
+    value_name = "NDVI"
     train_set, valid_set, test_set = get_train_valid_test_csv("data/rasters_csv/data.csv", "data/rasters_csv/2017-11-17", value_name)
     print("Train Images:", len(train_set))
     print("Valid Images:", len(valid_set))
@@ -96,7 +101,6 @@ if __name__ == "__main__":
     print("Learning rate: {}".format(lr))
 
     epochs = 100
-    top_acc = 0
     test_loss = 0
     best_loss = 1e10
     for i in range(epochs):
@@ -134,8 +138,8 @@ if __name__ == "__main__":
                 outputs = model(X)
                 loss = criterion(outputs, y)
                 test_loss += loss.data[0]
-                ys[i] = y.data
-                yhats[i] = outputs.data
+                ys[i] = y.data[0]
+                yhats[i] = outputs.data[0, 0]
             test_loss /= len(test_set)
             save_error_chart(ys, yhats, value_name, "results/{}.png".format(value_name))
         print("Valid Loss {}".format(round(np.sqrt(valid_loss), 4)))
