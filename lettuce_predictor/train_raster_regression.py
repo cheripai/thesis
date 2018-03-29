@@ -40,7 +40,7 @@ def get_train_valid_test_csv(csv_dir, target_col, p=0.15):
 if __name__ == "__main__":
     batch_size = 32
     lr = 0.0001
-    value_name = "Chlorophyll"
+    value_name = "Average Leaf Count"
     train_set, valid_set, test_set = get_train_valid_test_csv("data/rasters_csv", value_name)
     print("Train Images:", len(train_set))
     print("Valid Images:", len(valid_set))
