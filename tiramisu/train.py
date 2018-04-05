@@ -23,7 +23,7 @@ if __name__ == "__main__":
     train_set = PairedImageLoader("data/x_train", "data/y_train", transform=transform)
     valid_set = PairedImageLoader("data/x_valid", "data/y_valid", transform=transforms.ToTensor())
     trainloader  = DataLoader(train_set, batch_size=32, shuffle=True, num_workers=2, pin_memory=True)
-    validloader  = DataLoader(valid_set, batch_size=8, shuffle=False, num_workers=2, pin_memory=True)
+    validloader  = DataLoader(valid_set, batch_size=16, shuffle=False, num_workers=2, pin_memory=True)
 
     model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1).cuda()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -51,12 +51,6 @@ if __name__ == "__main__":
             outputs = model(x)
             loss = criterion(outputs, y)
             total_loss += loss.data[0]
-
-            for k in range(outputs.size(0)):
-                generated = outputs[k].data.cpu().squeeze().numpy() * 255
-                original = y[k].data.cpu().squeeze().numpy() * 255
-                imsave("results/{}_{}_generated.jpg".format(j, k), generated)
-                imsave("results/{}_{}_original.jpg".format(j, k), original)
 
         print("Valid loss:", total_loss / j)
 
