@@ -1,3 +1,4 @@
+# Usage: python process_micasense_ortho.py <INPUT_RASTER>
 import cv2
 import numpy as np
 import os
@@ -72,19 +73,3 @@ if __name__ == "__main__":
     rgb[:, :, 1] = G
     rgb[:, :, 2] = B
     imsave("rgb.png", rgb)
-
-    bins = np.arange(MIN, MAX, (MAX-MIN) / 256)
-    binner = lambda x: np.argmin(np.abs(bins-x))
-    vbin = np.vectorize(binner)
-
-    ndvi = vbin(NDVI(R, NIR))
-    re = vbin(RedEdge(R, RE))
-    evi = vbin(EVI(B, R, NIR))
-    mcari = vbin(MCARI(G, R, RE))
-    gndvi = vbin(GNDVI(G, NIR))
-
-    imsave("ndvi.png", ndvi)
-    imsave("re.png", re)
-    imsave("evi.png", evi)
-    imsave("mcari.png", mcari)
-    imsave("gndvi.png", gndvi)
