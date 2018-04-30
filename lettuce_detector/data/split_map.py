@@ -12,7 +12,7 @@ from scipy.misc import imsave
 
 column_names = ["filename", "width", "height", "class", "xmin", "ymin", "xmax", "ymax"]
 class_name = "lettuce"
-tile_size = 400
+tile_size = 1700
 
 def reshape_image(img, tile_size, max_cut=50):
     height = img.shape[0]
@@ -54,13 +54,13 @@ if __name__ == "__main__":
         for row in range(rows):
             for col in range(cols):
                 tile = img[row*tile_size:(row+1)*tile_size, col*tile_size:(col+1)*tile_size, :]
-                tile_path = os.path.join(output_dir, "{}_{}.jpg".format(row, col))
-                imsave(tile_path, tile)
+                tile_name = "{}_{}.jpg".format(row, col)
+                imsave(os.path.join(output_dir, tile_name), tile)
 
                 for annotation in tile_annotations[row][col]:
                     xmin = int(annotation["x"] - col * tile_size)
                     ymin = int(annotation["y"] - row * tile_size)
                     xmax = int(xmin + annotation["width"])
                     ymax = int(ymin + annotation["height"])
-                    line = "{},{},{},{},{},{},{},{}".format(tile_path, tile_size, tile_size, class_name, xmin, ymin, xmax, ymax)
+                    line = "{},{},{},{},{},{},{},{}".format(tile_name, tile_size, tile_size, class_name, xmin, ymin, xmax, ymax)
                     f.write(line + "\n")
