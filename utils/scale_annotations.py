@@ -1,3 +1,6 @@
+# Scales annotations based on source annotations and target image.
+# Useful for adapting annotations on an image of one resolution to another.
+# Usage: python scale_annotations.py <source annotation path> <target image directory> <output annotation path>
 import json
 import numpy as np
 import os

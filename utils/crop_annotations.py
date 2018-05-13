@@ -1,3 +1,7 @@
+# Crop annotations from Sloth into sub-images.
+# If row_order_path is provided, will crop into rows.
+# Otherwise, will crop into individual plant images.
+# Usage: python crop_annotations.py <annotation_path> <row_order_path (optional)>
 import json
 import numpy as np
 import os
