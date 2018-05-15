@@ -27,4 +27,4 @@ if __name__ == "__main__":
         loss = criterion(outputs * 255, y * 255)
         total_loss += loss.data[0]
 
-    print("MSE per pixel:", total_loss / (j + 1))
+    print("RMSE per pixel:", np.sqrt(total_loss / (j + 1)))
