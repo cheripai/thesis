@@ -18,7 +18,7 @@ if __name__ == "__main__":
     model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1).cuda()
     model.load_state_dict(torch.load(c.WEIGHTS_PATH))
     model.train(False)
-    criterion = nn.L1Loss()
+    criterion = nn.L2Loss()
 
     total_loss = 0
     for j, (x, y) in enumerate(loader):
@@ -27,4 +27,4 @@ if __name__ == "__main__":
         loss = criterion(outputs * 255, y * 255)
         total_loss += loss.data[0]
 
-    print("MAE per pixel:", total_loss / (j + 1))
+    print("MSE per pixel:", total_loss / (j + 1))
