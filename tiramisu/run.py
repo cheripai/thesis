@@ -50,7 +50,6 @@ if __name__ == "__main__":
     output_map = np.zeros((h, w))
 
     in_tiles = np.moveaxis(flatten_to_tiles(padded_img, c.IMG_SIZE), -1, 1)
-    imsave("test.png", unflatten_tiles(in_tiles[:, 0], p_h, p_w)[:h, :w])
     out_tiles = np.zeros((in_tiles.shape[0], c.IMG_SIZE, c.IMG_SIZE))
     for i in range(in_tiles.shape[0] // c.BATCH_SIZE):
         if (i+1) * c.BATCH_SIZE > in_tiles.shape[0]:

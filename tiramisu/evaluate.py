@@ -24,7 +24,7 @@ if __name__ == "__main__":
     for j, (x, y) in enumerate(loader):
         x, y = Variable(x.cuda()), Variable(y.cuda())
         outputs = model(x)
-        loss = criterion(outputs * 255, y * 255)
+        loss = criterion(outputs, y)
         total_loss += loss.data[0]
 
     print("RMSE per pixel:", np.sqrt(total_loss / (j + 1)))
