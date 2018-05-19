@@ -36,7 +36,7 @@ def unflatten_tiles(tiles, h, w):
 
 
 if __name__ == "__main__":
-    img = np.asarray(Image.open(sys.argv[1]), dtype=np.uint8)
+    img = np.asarray(Image.open(sys.argv[1]), dtype=np.uint8)[:,:,:3]
     h, w, ch = img.shape
 
     padded_img = np.zeros((h + 2*c.IMG_SIZE, w + 2*c.IMG_SIZE, ch))
