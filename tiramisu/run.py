@@ -12,6 +12,7 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+use_cuda = torch.cuda.is_available()
 
 def flatten_to_tiles(img, tile_size=c.IMG_SIZE):
     h, w, ch = img.shape
@@ -43,8 +44,12 @@ if __name__ == "__main__":
     padded_img[:h, :w, :] = img
     p_h, p_w, _ = padded_img.shape
 
-    model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1).cuda()
+    model = FCDenseNet([4, 5, 7, 10, 12, 15, 12, 10, 7, 5, 4], 16, drop_rate=0.0, n_classes=1)
     model.load_state_dict(torch.load(c.WEIGHTS_PATH))
+
+    if use_cuda:
+        model = model.cuda()
+
     model.train(False)
 
     output_map = np.zeros((h, w))
@@ -57,7 +62,10 @@ if __name__ == "__main__":
         else:
             batch_size = c.BATCH_SIZE
 
-        in_segment = Variable(torch.from_numpy(in_tiles[i*c.BATCH_SIZE:(i+1)*batch_size] / 256).type(torch.FloatTensor)).cuda()
+        in_segment = Variable(torch.from_numpy(in_tiles[i*c.BATCH_SIZE:(i+1)*batch_size] / 256).type(torch.FloatTensor))
+        if use_cuda:
+            in_segment = in_segment.cuda()
+
         out_segment = model(in_segment).data.squeeze().cpu().numpy()
         out_tiles[i*c.BATCH_SIZE:(i+1)*batch_size] = out_segment
 
